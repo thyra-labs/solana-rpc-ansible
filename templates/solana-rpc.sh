@@ -41,7 +41,9 @@ ARGS+=(
   --rpc-bind-address "{{ validator_rpc_bind_address }}"
   --dynamic-port-range "{{ validator_dynamic_port_range }}"
   --wal-recovery-mode "{{ validator_wal_recovery_mode }}"
+{% if validator_limit_ledger_size is defined and (validator_limit_ledger_size|string)|length > 0 %}
   --limit-ledger-size {{ validator_limit_ledger_size }}
+{% endif %}
   --private-rpc
   --no-genesis-fetch
   --no-voting
