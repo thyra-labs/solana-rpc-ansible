@@ -1,28 +1,40 @@
 ---
-- name: Gather variables on basis of solana network
+- name: Preflight checks
+  ansible.builtin.import_tasks: 0-preflight.yml
+  tags: [validator, preflight]
+
+- name: Gather network variables
   ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - "{{ validator_network | lower }}.yml"
     - "{{ validator_network | lower }}-default.yml"
+  tags: [validator, config]
 
 - name: Install dependencies
   ansible.builtin.import_tasks: 1-dependencies.yml
+  tags: [validator, dependencies]
 
-- name: Install rust
+- name: Install rust toolchain
   ansible.builtin.import_tasks: 2-rust.yml
-  when: validator_install_rust is defined and validator_install_rust
+  when: validator_install_rust | default(true)
+  tags: [validator, rust]
 
-- name: Install solana
+- name: Install Solana (jito)
   ansible.builtin.import_tasks: 3-install.yml
+  tags: [validator, install]
 
-- name: Set cpu optimizations
+- name: Apply CPU and sysctl optimizations
   ansible.builtin.import_tasks: 4-optimizations.yml
+  tags: [validator, optimize]
 
-- name: Setup RPC identity
+- name: Setup RPC identity and keypairs
   ansible.builtin.import_tasks: 5-identity.yml
+  tags: [validator, identity]
 
-- name: Setup solana service files
+- name: Install systemd user services
   ansible.builtin.import_tasks: 6-service.yml
+  tags: [validator, service]
 
 - name: Configure firewall (UFW)
   ansible.builtin.import_tasks: 7-firewall.yml
+  tags: [validator, firewall]

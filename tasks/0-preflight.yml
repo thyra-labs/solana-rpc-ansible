@@ -1,0 +1,61 @@
+---
+- name: Preflight | Validate target host and variables
+  block:
+    - name: Assert systemd is available
+      ansible.builtin.assert:
+        that:
+          - ansible_service_mgr == 'systemd'
+        fail_msg: "This role requires systemd. Found: {{ ansible_service_mgr }}"
+
+    - name: Assert supported OS family
+      ansible.builtin.assert:
+        that:
+          - ansible_os_family in ['Debian', 'Ubuntu']
+        fail_msg: "Unsupported OS family: {{ ansible_os_family }}. Expected Debian/Ubuntu family."
+
+    - name: Assert validator user is non-root
+      ansible.builtin.assert:
+        that:
+          - validator_username is string
+          - validator_username | lower != 'root'
+        fail_msg: "validator_username must be a non-root user"
+
+    - name: Assert validator_network value
+      ansible.builtin.assert:
+        that:
+          - validator_network | lower in ['mainnet', 'testnet', 'devnet']
+        fail_msg: "validator_network must be one of mainnet, testnet, devnet"
+
+    - name: Assert key directories are absolute paths
+      ansible.builtin.assert:
+        that:
+          - validator_root is match('^/.+')
+          - validator_ledger_location is match('^/.+')
+          - validator_accounts_location is match('^/.+')
+        fail_msg: "validator_root, ledger, and accounts must be absolute paths"
+
+    - name: Assert repo URLs and component flags are consistent
+      ansible.builtin.assert:
+        that:
+          - (not validator_enable_shredstream) or (shredstream_repo_url | length > 0)
+          - (not validator_enable_peregrine) or (peregrine_repo_url | length > 0)
+          - jito_solana_repo_url | length > 0
+          - yellowstone_repo_url | length > 0
+        fail_msg: "Enable flags require corresponding repo URLs to be set."
+
+    - name: Assert block engine/relayer/shred receiver are set together when any is set
+      ansible.builtin.assert:
+        that:
+          - (
+              (validator_block_engine_url | length == 0) and
+              (validator_relayer_url | length == 0) and
+              (validator_shred_receiver_address | length == 0)
+            )
+            or 
+            (
+              (validator_block_engine_url | length > 0) and
+              (validator_relayer_url | length > 0) and
+              (validator_shred_receiver_address | length > 0)
+            )
+        fail_msg: "If using block engine integration, set all of validator_block_engine_url, validator_relayer_url, and validator_shred_receiver_address."
+
