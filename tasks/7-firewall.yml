@@ -1,0 +1,46 @@
+---
+- name: Ensure UFW is installed
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+
+- name: Ensure UFW defaults are sane
+  block:
+    - name: Set UFW default deny incoming
+      ansible.builtin.command: ufw default deny incoming
+      register: ufw_deny
+      changed_when: "'Default incoming policy changed' in ufw_deny.stdout"
+    - name: Set UFW default allow outgoing
+      ansible.builtin.command: ufw default allow outgoing
+      register: ufw_allow
+      changed_when: "'Default outgoing policy changed' in ufw_allow.stdout"
+
+- name: Remove obsolete TCP dynamic port range 8002:8020
+  ansible.builtin.shell: |
+    set -euo pipefail
+    ufw status numbered | awk '/8002:8020\/tcp/ {print $1}' | tr -d '[]' | sort -rn | xargs -r -n1 ufw --force delete
+  args:
+    executable: /bin/bash
+  register: ufw_removed_tcp_range
+  changed_when: ufw_removed_tcp_range.stdout is not defined or ufw_removed_tcp_range.stdout != ""
+
+- name: Allow Solana gossip port 8001/tcp
+  ansible.builtin.command: ufw allow 8001/tcp
+  register: ufw_allow_8001_tcp
+  changed_when: "'Skipping adding existing rule' not in ufw_allow_8001_tcp.stdout"
+
+- name: Allow Solana RPC port {{ validator_rpc_port }}/tcp # noqa: no-jinja-when
+  ansible.builtin.command: ufw allow {{ validator_rpc_port }}/tcp
+  register: ufw_allow_rpc
+  changed_when: "'Skipping adding existing rule' not in ufw_allow_rpc.stdout"
+
+- name: Allow Solana dynamic UDP ports 8000:10000
+  ansible.builtin.command: ufw allow 8000:10000/udp
+  register: ufw_allow_udp_range
+  changed_when: "'Skipping adding existing rule' not in ufw_allow_udp_range.stdout"
+
+- name: Enable UFW
+  ansible.builtin.command: ufw --force enable
+  register: ufw_enable
+  changed_when: "'Firewall is active and enabled on system startup' in ufw_enable.stdout"
+

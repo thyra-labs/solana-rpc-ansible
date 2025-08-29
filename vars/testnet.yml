@@ -1,0 +1,23 @@
+---
+validator_genesis_hash: 4uhcVJyU9pJkvQyS88uRDiswHXSCkY3zQawwpjk2NsNY
+
+validator_entrypoints:
+  - entrypoint.testnet.solana.com:8001
+  - entrypoint2.testnet.solana.com:8001
+  - entrypoint3.testnet.solana.com:8001
+
+validator_known_validators:
+  - 5D1fNXzvv5NjV1ysLjirC4WY92RNsVH18vjmcszZd8on
+  - 7XSY3MrYnK8vq693Rju17bbPkCN3Z7KvvfvJx4kdrsSY
+  - Ft5fbkqNa76vnsjYNwjDZUXoTWpP7VYm3mtsaQckQADN
+  - 9QxCLckBiJc783jnMvXZubK4wH86Eqqvashtrwvcsgkv
+
+validator_enable_shredstream: false
+
+validator_block_engine_url: ""
+validator_relayer_url: ""
+validator_shred_receiver_address: ""
+validator_tip_payment_program_pubkey: GJHtFqM9agxPmkeKjHny6qiRKrXZALvvFGiKf11QE7hy
+validator_tip_distribution_program_pubkey: F2Zu7QZiTYUhPd7u9ukRVwxh7B71oA3NMJcHuCHc29P2
+validator_merkle_root_upload_authority: GZctHpWXmsZC1YHACTGGcHhYxjdRqQvTpYkb9LMvxDib
+validator_ntp_server: ""

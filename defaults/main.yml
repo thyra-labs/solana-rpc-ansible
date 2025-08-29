@@ -1,0 +1,83 @@
+validator_username: validator
+validator_cpu_governor: performance
+
+validator_network: mainnet
+
+validator_root: /solana
+validator_ledger_location: /solana/ledger
+validator_accounts_location: /solana/accounts
+validator_snapshots_location: /solana/snapshots
+
+validator_environment:
+  - RUST_LOG=solana=info,validator_streamer::streamer=warn
+
+validator_install_rust: true
+validator_source_version: v2.3.6-jito
+validator_shredstream_version: master
+validator_yellowstone_version: v9.0.0+solana.2.3.6
+validator_peregrine_version: main
+
+validator_generate_keypair: true
+validator_public_key: "/home/{{ validator_username }}/identity.json"
+validator_keypairs: []
+
+validator_rpc_threads: 32
+validator_full_rpc_api: true
+validator_enable_geyser: false
+validator_x_token: ""
+validator_enable_shredstream: false
+validator_enable_peregrine: false
+validator_rpc_history: false
+
+validator_account_index:
+  - program-id
+validator_index_exclude_keys: []
+validator_index_include_keys: []
+
+validator_known_validators: []
+validator_authorized_voters: []
+
+validator_minimal_snapshot_download_speed: "200000000"
+validator_incremental_snapshot_interval_slots: "1000"
+validator_full_snapshot_interval_slots: "25000"
+validator_rpc_max_multiple_accounts: "5000"
+
+validator_gossip_port: "8001"
+validator_rpc_port: "8899"
+validator_rpc_bind_address: "0.0.0.0"
+validator_dynamic_port_range: "8000-10000"
+validator_wal_recovery_mode: skip_any_corrupted_record
+validator_limit_ledger_size: ""
+validator_accounts_db_cache_limit: 800000
+validator_accounts_index_memory_limit: 150000
+
+validator_bigtable_enabled: false
+validator_bigtable_upload_enabled: false
+
+validator_enabled_services:
+  - solana-rpc
+  - shredstream-proxy
+validator_disabled_services: []
+
+validator_sysctl_optimisations:
+  fs.nr_open: "1000000"
+  kernel.nmi_watchdog: "0"
+  kernel.pid_max: "65536"
+  net.ipv4.tcp_fastopen: "3"
+  net.core.rmem_max: "134217728"
+  net.core.rmem_default: "134217728"
+  net.core.wmem_max: "134217728"
+  net.core.wmem_default: "134217728"
+  vm.max_map_count: "1000000"
+
+# --- Git cloning controls ---
+# Use HTTPS by default to avoid SSH key requirements.
+validator_git_use_ssh: false
+
+# Repository URLs (override to use forks; SSH URLs only if validator_git_use_ssh=true)
+jito_solana_repo_url: https://github.com/jito-foundation/jito-solana.git
+yellowstone_repo_url: https://github.com/rpcpool/yellowstone-grpc.git
+
+# Optional components; set only when enabled
+shredstream_repo_url: ""
+peregrine_repo_url: ""

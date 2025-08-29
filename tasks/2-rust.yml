@@ -1,0 +1,36 @@
+---
+- name: Download rust installer
+  ansible.builtin.get_url:
+    url: "https://sh.rustup.rs"
+    dest: /usr/local/sbin/rustup-install.sh
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Install rust
+  ansible.builtin.command: "/usr/local/sbin/rustup-install.sh -y"
+  args:
+    chdir: "/home/{{ validator_username }}/"
+  become: true
+  become_user: "{{ validator_username }}"
+  register: install_output
+  changed_when: false
+
+- name: Debug
+  ansible.builtin.debug:
+    var: install_output
+
+- name: Install rustfmt
+  ansible.builtin.command: rustup component add rustfmt
+  args:
+    chdir: "/home/{{ validator_username }}/"
+  environment:
+    PATH: "/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin"
+  become: true
+  become_user: "{{ validator_username }}"
+  register: rustup_output
+  changed_when: false
+
+- name: Debug
+  ansible.builtin.debug:
+    var: rustup_output

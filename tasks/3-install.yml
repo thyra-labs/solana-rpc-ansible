@@ -1,0 +1,170 @@
+---
+- name: Ensure ~/.ssh exists
+  ansible.builtin.file:
+    path: "/home/{{ validator_username }}/.ssh"
+    state: directory
+    owner: "{{ validator_username }}"
+    group: "{{ validator_username }}"
+    mode: '0700'
+
+- name: Add GitHub to known_hosts on the remote
+  ansible.builtin.known_hosts:
+    path: "/home/{{ validator_username }}/.ssh/known_hosts"
+    name: github.com
+    key: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}"
+  when: validator_git_use_ssh | bool
+
+- name: Install GitHub Access SSH key
+  ansible.builtin.copy:
+    dest: "/home/{{ validator_username }}/.ssh/deploy_id_rsa"
+    content: "{{ ssh_private_key_b64 | b64decode }}"
+    owner: "{{ validator_username }}"
+    group: "{{ validator_username }}"
+    mode: '0600'
+  when:
+    - validator_git_use_ssh | bool
+    - ssh_private_key_b64 is defined
+    - ssh_private_key_b64 | length > 0
+  become: true
+  become_user: "{{ validator_username }}"
+
+- name: Ensure validator's storage directories are available
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: "{{ validator_username }}"
+    group: "{{ validator_username }}"
+    mode: "0755"
+    state: directory
+  with_items:
+    - "/home/{{ validator_username }}/bin"
+    - "{{ validator_root }}"
+    - "{{ validator_ledger_location }}"
+    - "{{ validator_ledger_location }}/rocksdb"
+    - "{{ validator_accounts_location }}"
+
+- name: Setup the Jito validator
+  block:
+    - name: Clone the jito-solana repository
+      ansible.builtin.git:
+        repo: "{{ jito_solana_repo_url }}"
+        dest: "/home/{{ validator_username }}/jito-solana"
+        key_file: "{{ '/home/' ~ validator_username ~ '/.ssh/deploy_id_rsa' if validator_git_use_ssh else omit }}"
+        clone: true
+        version: "{{ validator_source_version }}"
+        force: true
+      become: true
+      become_user: "{{ validator_username }}"
+    - name: Build the jito-solana repository
+      ansible.builtin.command:
+        cmd: "./scripts/cargo-install-all.sh --validator-only ~/.local/share/solana/install/releases/{{ validator_source_version }}"
+        chdir: "/home/{{ validator_username }}/jito-solana"
+        creates: "~/.local/share/solana/install/releases/{{ validator_source_version }}/bin/agave-validator"
+      environment:
+        PATH: "/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin"
+      become: true
+      become_user: "{{ validator_username }}"
+    - name: Point active_release to current build
+      ansible.builtin.file:
+        src: "/home/{{ validator_username }}/.local/share/solana/install/releases/{{ validator_source_version }}"
+        path: "/home/{{ validator_username }}/.local/share/solana/install/active_release"
+        state: link
+        force: true
+      become: true
+      become_user: "{{ validator_username }}"
+
+- name: Setup Jito Shredstream Proxy
+  when: validator_enable_shredstream is defined and validator_enable_shredstream
+  block:
+    - name: Clone Jito Shredstream repository
+      when: shredstream_repo_url is defined and shredstream_repo_url | length > 0
+      ansible.builtin.git:
+        repo: "{{ shredstream_repo_url }}"
+        dest: "/home/{{ validator_username }}/shredstream-proxy"
+        key_file: "{{ '/home/' ~ validator_username ~ '/.ssh/deploy_id_rsa' if validator_git_use_ssh else omit }}"
+        clone: true
+        version: "{{ validator_shredstream_version }}"
+        force: true
+      become: true
+      become_user: "{{ validator_username }}"
+    - name: Build the Shredstream entrypoint
+      ansible.builtin.command:
+        cmd: cargo build --release --bin jito-shredstream-proxy
+        creates: "/home/{{ validator_username }}/shredstream-proxy/target/release/jito-shredstream-proxy"
+      args:
+        chdir: "/home/{{ validator_username }}/shredstream-proxy"
+      environment:
+        PATH: "/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin"
+      become: true
+      become_user: "{{ validator_username }}"
+
+
+- name: Setup Yellowstone-gRPC
+  when: validator_enable_geyser is defined and validator_enable_geyser
+  block:
+    - name: Clone the Yellowstone gRPC repository
+      ansible.builtin.git:
+        repo: "{{ yellowstone_repo_url }}"
+        dest: "/home/{{ validator_username }}/yellowstone-grpc"
+        key_file: "{{ '/home/' ~ validator_username ~ '/.ssh/deploy_id_rsa' if validator_git_use_ssh else omit }}"
+        clone: true
+        version: "{{ validator_yellowstone_version }}"
+        force: true
+      become: true
+      become_user: "{{ validator_username }}"
+    - name: Build the gRPC .so binary
+      ansible.builtin.command:
+        cmd: cargo build --release
+        creates: "/home/{{ validator_username }}/yellowstone-grpc/target/release/libyellowstone_grpc_geyser.so"
+      args:
+        chdir: "/home/{{ validator_username }}/yellowstone-grpc/yellowstone-grpc-geyser"
+      environment:
+        PATH: "/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin"
+      become: true
+      become_user: "{{ validator_username }}"
+    - name: Copy the Yellowstone config
+      ansible.builtin.template:
+        src: yellowstone.config.json
+        dest: "/home/{{ validator_username }}/yellowstone-grpc/yellowstone-grpc-geyser/config.json"
+        owner: "{{ validator_username }}"
+        group: "{{ validator_username }}"
+        mode: "0755"
+
+- name: Setup Peregrine gPA Cache
+  when: validator_enable_peregrine is defined and validator_enable_peregrine
+  block:
+    - name: Clone the Peregrine repository
+      when: peregrine_repo_url is defined and peregrine_repo_url | length > 0
+      ansible.builtin.git:
+        repo: "{{ peregrine_repo_url }}"
+        dest: "/home/{{ validator_username }}/peregrine"
+        clone: true
+        force: true
+        key_file: "{{ '/home/' ~ validator_username ~ '/.ssh/deploy_id_rsa' if validator_git_use_ssh else omit }}"
+        version: "{{ validator_peregrine_version }}"
+      become: true
+      become_user: "{{ validator_username }}"
+    - name: Build the Peregrine binary
+      ansible.builtin.command:
+        cmd: cargo build --release
+        creates: "/home/{{ validator_username }}/peregrine/target/release/peregrine"
+      args:
+        chdir: "/home/{{ validator_username }}/peregrine"
+      environment:
+        PATH: "/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin"
+      become: true
+      become_user: "{{ validator_username }}"
+    - name: Copy the Peregrine config
+      ansible.builtin.template:
+        src: peregrine.config.json
+        dest: "/home/{{ validator_username }}/peregrine/config.json"
+        owner: "{{ validator_username }}"
+        group: "{{ validator_username }}"
+        mode: "0755"
+
+- name: "Remove extra file {{ item }}"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  become: true
+  with_items:
+    - "/home/{{ validator_username }}/.ssh/deploy_id_rsa"

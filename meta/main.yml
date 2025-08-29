@@ -1,0 +1,12 @@
+---
+galaxy_info:
+  author: Petro Saputskyi
+  role_name: validator
+  description: Ansible role for deploying Solana RPC nodes
+  company: Manhattan 332
+  license: MIT
+  min_ansible_version: "2.18"
+
+dependencies: []
+collections:
+  - ansible.posix

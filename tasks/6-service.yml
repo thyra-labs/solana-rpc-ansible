@@ -1,0 +1,118 @@
+---
+- name: Ensure xdg runtime dir is set in ~/.profile
+  ansible.builtin.lineinfile:
+      path: "/home/{{ validator_username }}/.profile"
+      regexp: "^export XDG_RUNTIME_DIR"
+      line: "export XDG_RUNTIME_DIR=/run/user/$(id -u)"
+
+- name: Ensure solana user can use lingering systemd
+  ansible.builtin.command: loginctl enable-linger "{{ validator_username }}"
+  changed_when: false
+
+- name: Ensure solana user is part of systemd-journal group
+  ansible.builtin.user:
+      name: "{{ validator_username }}"
+      groups: systemd-journal
+      append: true
+
+- name: Ensure solana directories exists
+  ansible.builtin.file:
+      path: "{{ item }}"
+      state: directory
+      mode: "0755"
+      owner: root
+      group: root
+  with_items:
+      - "/etc/systemd/system/user@.service.d/"
+      - "/etc/systemd/user.conf.d/"
+
+- name: Install user service override
+  ansible.builtin.template:
+      src: user-override.conf
+      dest: /etc/systemd/system/user@.service.d/override.conf
+      owner: root
+      group: root
+      mode: "0644"
+
+- name: Install root limit override
+  ansible.builtin.template:
+      src: limits.conf
+      dest: /etc/security/limits.d/90-solana-nofiles.conf
+      owner: root
+      group: root
+      mode: "0644"
+
+- name: Install user override values
+  ansible.builtin.template:
+      src: user-conf-d-override.conf
+      dest: /etc/systemd/user.conf.d/override.conf
+      owner: root
+      group: root
+      mode: "0644"
+
+- name: Ensure systemd user dir is available
+  ansible.builtin.file:
+      path: "/home/{{ validator_username }}/.config/systemd/user/"
+      owner: "{{ validator_username }}"
+      group: "{{ validator_username }}"
+      mode: "0750"
+      state: directory
+
+- name: Copy rpc.sh
+  ansible.builtin.template:
+      src: solana-rpc.sh
+      dest: "/home/{{ validator_username }}/bin/solana-rpc.sh"
+      owner: "{{ validator_username }}"
+      group: "{{ validator_username }}"
+      mode: "0755"
+
+- name: Copy rpc.env
+  ansible.builtin.template:
+      src: solana-rpc.env
+      dest: "/home/{{ validator_username }}/solana-rpc.env"
+      owner: "{{ validator_username }}"
+      group: "{{ validator_username }}"
+      mode: "0640"
+
+- name: Install service
+  ansible.builtin.template:
+      src: "{{ item }}.service"
+      dest: "/home/{{ validator_username }}/.config/systemd/user/{{ item }}.service"
+      owner: "{{ validator_username }}"
+      group: "{{ validator_username }}"
+      mode: "0644"
+  with_items:
+      - solana-rpc
+      - shredstream-proxy
+      - peregrine
+  loop_control:
+      label: "{{ item }}"
+
+- name: "Register uid of {{ validator_username }}"
+  ansible.builtin.command: "id -u {{ validator_username }}"
+  register: validator_uid
+  changed_when: false
+
+- name: Setup services
+  ansible.builtin.systemd:
+      daemon_reload: true
+      name: "{{ item }}"
+      enabled: true
+      scope: user
+  become: true
+  become_user: "{{ validator_username }}"
+  environment:
+      XDG_RUNTIME_DIR: "/run/user/{{ validator_uid.stdout }}"
+  with_items: "{{ validator_enabled_services }}"
+
+- name: Setup services (disabled)
+  ansible.builtin.systemd:
+      daemon_reload: true
+      name: "{{ item }}"
+      enabled: false
+      scope: user
+  become: true
+  become_user: "{{ validator_username }}"
+  environment:
+      XDG_RUNTIME_DIR: "/run/user/{{ validator_uid.stdout }}"
+  with_items: "{{ validator_disabled_services }}"

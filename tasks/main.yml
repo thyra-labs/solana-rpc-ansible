@@ -1,0 +1,28 @@
+---
+- name: Gather variables on basis of solana network
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ validator_network | lower }}.yml"
+    - "{{ validator_network | lower }}-default.yml"
+
+- name: Install dependencies
+  ansible.builtin.import_tasks: 1-dependencies.yml
+
+- name: Install rust
+  ansible.builtin.import_tasks: 2-rust.yml
+  when: validator_install_rust is defined and validator_install_rust
+
+- name: Install solana
+  ansible.builtin.import_tasks: 3-install.yml
+
+- name: Set cpu optimizations
+  ansible.builtin.import_tasks: 4-optimizations.yml
+
+- name: Setup RPC identity
+  ansible.builtin.import_tasks: 5-identity.yml
+
+- name: Setup solana service files
+  ansible.builtin.import_tasks: 6-service.yml
+
+- name: Configure firewall (UFW)
+  ansible.builtin.import_tasks: 7-firewall.yml
