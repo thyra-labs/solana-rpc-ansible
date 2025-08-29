@@ -43,6 +43,8 @@ ARGS+=(
   --wal-recovery-mode "{{ validator_wal_recovery_mode }}"
 {% if validator_limit_ledger_size is defined and (validator_limit_ledger_size|string)|length > 0 %}
   --limit-ledger-size {{ validator_limit_ledger_size }}
+{% else %}
+  --limit-ledger-size
 {% endif %}
   --private-rpc
   --no-genesis-fetch
