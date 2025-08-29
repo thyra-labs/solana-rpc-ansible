@@ -111,10 +111,9 @@
         force: true
       become: true
       become_user: "{{ validator_username }}"
-    - name: Build the gRPC .so binary
+    - name: Build the gRPC .so binary (always)
       ansible.builtin.command:
         cmd: cargo build --release
-        creates: "/home/{{ validator_username }}/yellowstone-grpc/target/release/libyellowstone_grpc_geyser.so"
       args:
         chdir: "/home/{{ validator_username }}/yellowstone-grpc/yellowstone-grpc-geyser"
       environment:
