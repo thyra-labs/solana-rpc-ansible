@@ -1,0 +1,75 @@
+---
+- name: Ensure UFW is installed
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+
+- name: Ensure UFW defaults are sane
+  block:
+    - name: Set UFW default deny incoming
+      ansible.builtin.command: ufw default deny incoming
+      register: ufw_deny
+      changed_when: "'Default incoming policy changed' in ufw_deny.stdout"
+    - name: Set UFW default allow outgoing
+      ansible.builtin.command: ufw default allow outgoing
+      register: ufw_allow
+      changed_when: "'Default outgoing policy changed' in ufw_allow.stdout"
+
+- name: Allow Solana gossip port {{ validator_gossip_port }}/tcp # noqa: no-jinja-when
+  ansible.builtin.command: ufw allow {{ validator_gossip_port }}/tcp
+  register: ufw_allow_gossip_tcp
+  changed_when: "'Skipping adding existing rule' not in ufw_allow_gossip_tcp.stdout"
+
+- name: Allow Solana dynamic UDP ports {{ validator_dynamic_port_range | replace('-', ':') }} # noqa: no-jinja-when
+  ansible.builtin.command: ufw allow {{ (validator_dynamic_port_range | replace('-', ':')) + '/udp' }}
+  register: ufw_allow_udp_range
+  changed_when: "'Skipping adding existing rule' not in ufw_allow_udp_range.stdout"
+
+- name: Allow Shredstream UDP port {{ validator_shredstream_udp_port }} # noqa: no-jinja-when
+  ansible.builtin.command: ufw allow {{ validator_shredstream_udp_port }}/udp
+  register: ufw_allow_udp_extra
+  changed_when: "'Skipping adding existing rule' not in ufw_allow_udp_extra.stdout"
+  when: validator_enable_shredstream | bool
+
+# Optional exposure rules
+- name: Allow RPC port {{ validator_rpc_port }}/tcp # noqa: no-jinja-when
+  ansible.builtin.command: ufw allow {{ validator_rpc_port }}/tcp
+  register: ufw_allow_rpc_tcp
+  changed_when: "'Skipping adding existing rule' not in ufw_allow_rpc_tcp.stdout"
+  when: firewall_expose_rpc | bool
+
+- name: Derive Yellowstone gRPC/Prometheus ports
+  ansible.builtin.set_fact:
+    _ys_grpc_port: "{{ (yellowstone_grpc_address.split(':') | last) | trim }}"
+    _ys_prom_port: "{{ (yellowstone_prometheus_address.split(':') | last) | trim }}"
+  when: validator_enable_geyser | bool
+
+- name: Allow Yellowstone gRPC port {{ _ys_grpc_port | default(yellowstone_grpc_port) }}/tcp # noqa: no-jinja-when
+  ansible.builtin.command: ufw allow {{ (_ys_grpc_port | default(yellowstone_grpc_port)) }}/tcp
+  register: ufw_allow_ys_grpc
+  changed_when: "'Skipping adding existing rule' not in ufw_allow_ys_grpc.stdout"
+  when: firewall_expose_yellowstone_grpc | bool and validator_enable_geyser | bool
+
+- name: Allow Yellowstone Prometheus port {{ _ys_prom_port | default(yellowstone_prometheus_port) }}/tcp # noqa: no-jinja-when
+  ansible.builtin.command: ufw allow {{ (_ys_prom_port | default(yellowstone_prometheus_port)) }}/tcp
+  register: ufw_allow_ys_prom
+  changed_when: "'Skipping adding existing rule' not in ufw_allow_ys_prom.stdout"
+  when: firewall_expose_yellowstone_prometheus | bool and validator_enable_geyser | bool
+
+- name: Allow Peregrine API port {{ peregrine_api_port }}/tcp # noqa: no-jinja-when
+  ansible.builtin.command: ufw allow {{ peregrine_api_port }}/tcp
+  register: ufw_allow_peregrine_api
+  changed_when: "'Skipping adding existing rule' not in ufw_allow_peregrine_api.stdout"
+  when: firewall_expose_peregrine_api | bool and validator_enable_peregrine | bool
+
+- name: Check UFW status
+  ansible.builtin.command: ufw status
+  register: ufw_status
+  changed_when: false
+  failed_when: false
+
+- name: Enable UFW if inactive
+  ansible.builtin.command: ufw --force enable
+  register: ufw_enable
+  changed_when: "'Firewall is active and enabled on system startup' in ufw_enable.stdout"
+  when: ufw_status is not defined or ('inactive' in (ufw_status.stdout | default('inactive')))

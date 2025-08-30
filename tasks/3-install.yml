@@ -1,0 +1,198 @@
+---
+
+- name: Ensure validator's storage directories are available
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: "{{ validator_username }}"
+    group: "{{ validator_username }}"
+    mode: "0755"
+    state: directory
+  with_items:
+    - "/home/{{ validator_username }}/bin"
+    - "{{ validator_root }}"
+    - "{{ validator_ledger_location }}"
+    - "{{ validator_ledger_location }}/rocksdb"
+    - "{{ validator_accounts_location }}"
+
+- name: Setup the Jito validator
+  block:
+    - name: Clone the jito-solana repository
+      ansible.builtin.git:
+        repo: "{{ jito_solana_repo_url }}"
+        dest: "/home/{{ validator_username }}/jito-solana"
+        clone: true
+        version: "{{ validator_source_version }}"
+        force: true
+      become: true
+      become_user: "{{ validator_username }}"
+    - name: Build the jito-solana repository
+      ansible.builtin.command:
+        cmd: "./scripts/cargo-install-all.sh --validator-only ~/.local/share/solana/install/releases/{{ validator_source_version }}"
+        chdir: "/home/{{ validator_username }}/jito-solana"
+        creates: "/home/{{ validator_username }}/.local/share/solana/install/releases/{{ validator_source_version }}/bin/agave-validator"
+      environment:
+        PATH: "/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin"
+      become: true
+      become_user: "{{ validator_username }}"
+    - name: Point active_release to current build
+      ansible.builtin.file:
+        src: "/home/{{ validator_username }}/.local/share/solana/install/releases/{{ validator_source_version }}"
+        path: "/home/{{ validator_username }}/.local/share/solana/install/active_release"
+        state: link
+        force: true
+      become: true
+      become_user: "{{ validator_username }}"
+
+- name: Setup Jito Shredstream Proxy
+  when: validator_enable_shredstream is defined and validator_enable_shredstream
+  block:
+    - name: Clone Jito Shredstream repository
+      when: shredstream_repo_url is defined and shredstream_repo_url | length > 0
+      ansible.builtin.git:
+        repo: "{{ shredstream_repo_url }}"
+        dest: "/home/{{ validator_username }}/shredstream-proxy"
+        clone: true
+        version: "{{ validator_shredstream_version }}"
+        force: true
+      become: true
+      become_user: "{{ validator_username }}"
+    - name: Build the Shredstream entrypoint
+      ansible.builtin.command:
+        cmd: cargo build --release --bin jito-shredstream-proxy
+        creates: "/home/{{ validator_username }}/shredstream-proxy/target/release/jito-shredstream-proxy"
+      args:
+        chdir: "/home/{{ validator_username }}/shredstream-proxy"
+      environment:
+        PATH: "/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin"
+      become: true
+      become_user: "{{ validator_username }}"
+    - name: Write shredstream auth keypair from base58
+      ansible.builtin.shell: |
+        set -euo pipefail
+        python3 - << 'PY'
+        import json
+        import sys
+
+        b58 = '''{{ validator_shredstream_auth_keypair_b58 }}'''.strip()
+        if not b58:
+            sys.exit(0)
+
+        alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+        base = 58
+        num = 0
+        for ch in b58:
+            num *= base
+            try:
+                num += alphabet.index(ch)
+            except ValueError:
+                print('Invalid base58 character in key', file=sys.stderr)
+                sys.exit(1)
+        # Convert integer to bytes
+        out = bytearray()
+        while num > 0:
+            num, rem = divmod(num, 256)
+            out.append(rem)
+        # account for leading zeros
+        n_zeros = 0
+        for ch in b58:
+            if ch == '1':
+                n_zeros += 1
+            else:
+                break
+        out.extend(b'\x00' * n_zeros)
+        out = bytes(reversed(out))
+        if len(out) != 64:
+            print(f'Expected 64-byte secret key (got {len(out)} bytes). Provide full 64-byte base58-encoded secret key.', file=sys.stderr)
+            sys.exit(2)
+        arr = list(out)
+        path = "/home/{{ validator_username }}/shredstream-proxy/jito-blockengine-keypair.json"
+        with open(path, 'w') as f:
+            json.dump(arr, f)
+        PY
+        chown {{ validator_username }}:{{ validator_username }} "/home/{{ validator_username }}/shredstream-proxy/jito-blockengine-keypair.json"
+        chmod 0600 "/home/{{ validator_username }}/shredstream-proxy/jito-blockengine-keypair.json"
+      args:
+        executable: /bin/bash
+      when:
+        - validator_enable_shredstream | bool
+        - (validator_shredstream_auth_keypair_b58 | default('')) | length > 0
+
+    - name: Write shredstream auth keypair from b64/plain json
+      ansible.builtin.copy:
+        dest: "/home/{{ validator_username }}/shredstream-proxy/jito-blockengine-keypair.json"
+        content: "{{ (validator_shredstream_auth_keypair_b64 | default('')) | length > 0 | ternary(validator_shredstream_auth_keypair_b64 | b64decode, validator_shredstream_auth_keypair) }}"
+        owner: "{{ validator_username }}"
+        group: "{{ validator_username }}"
+        mode: "0600"
+      when:
+        - validator_enable_shredstream | bool
+        - (validator_shredstream_auth_keypair_b58 | default('')) | length == 0
+        - (validator_shredstream_auth_keypair | default('')) | length > 0 or (validator_shredstream_auth_keypair_b64 | default('')) | length > 0
+    - name: Install shredstream run.sh
+      ansible.builtin.template:
+        src: shredstream-run.sh
+        dest: "/home/{{ validator_username }}/shredstream-proxy/run.sh"
+        owner: "{{ validator_username }}"
+        group: "{{ validator_username }}"
+        mode: "0755"
+
+
+- name: Setup Yellowstone-gRPC
+  when: validator_enable_geyser is defined and validator_enable_geyser
+  block:
+    - name: Clone the Yellowstone gRPC repository
+      ansible.builtin.git:
+        repo: "{{ yellowstone_repo_url }}"
+        dest: "/home/{{ validator_username }}/yellowstone-grpc"
+        clone: true
+        version: "{{ validator_yellowstone_version }}"
+        force: true
+      become: true
+      become_user: "{{ validator_username }}"
+    - name: Build the gRPC .so binary (always)
+      ansible.builtin.command:
+        cmd: cargo build --release
+      args:
+        chdir: "/home/{{ validator_username }}/yellowstone-grpc/yellowstone-grpc-geyser"
+      environment:
+        PATH: "/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin"
+      become: true
+      become_user: "{{ validator_username }}"
+    - name: Copy the Yellowstone config
+      ansible.builtin.template:
+        src: yellowstone.config.json
+        dest: "/home/{{ validator_username }}/yellowstone-grpc/yellowstone-grpc-geyser/config.json"
+        owner: "{{ validator_username }}"
+        group: "{{ validator_username }}"
+        mode: "0644"
+
+- name: Setup Peregrine gPA Cache
+  when: validator_enable_peregrine is defined and validator_enable_peregrine
+  block:
+    - name: Clone the Peregrine repository
+      when: peregrine_repo_url is defined and peregrine_repo_url | length > 0
+      ansible.builtin.git:
+        repo: "{{ peregrine_repo_url }}"
+        dest: "/home/{{ validator_username }}/peregrine"
+        clone: true
+        force: true
+        version: "{{ validator_peregrine_version }}"
+      become: true
+      become_user: "{{ validator_username }}"
+    - name: Build the Peregrine binary
+      ansible.builtin.command:
+        cmd: cargo build --release
+        creates: "/home/{{ validator_username }}/peregrine/target/release/peregrine"
+      args:
+        chdir: "/home/{{ validator_username }}/peregrine"
+      environment:
+        PATH: "/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin"
+      become: true
+      become_user: "{{ validator_username }}"
+    - name: Copy the Peregrine config
+      ansible.builtin.template:
+        src: peregrine.config.json
+        dest: "/home/{{ validator_username }}/peregrine/config.json"
+        owner: "{{ validator_username }}"
+        group: "{{ validator_username }}"
+        mode: "0644"

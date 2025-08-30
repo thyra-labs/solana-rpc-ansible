@@ -1,0 +1,52 @@
+---
+- name: Ensure solana key is present
+  ansible.builtin.command:
+    cmd: solana-keygen new -o /home/{{ validator_username }}/identity.json --no-bip39-passphrase -s
+    creates: /home/{{ validator_username }}/identity.json
+    chdir: "/home/{{ validator_username }}/"
+  become: true
+  become_user: "{{ validator_username }}"
+  environment:
+    PATH: "/bin:/usr/bin:/usr/local/bin:\
+      /home/{{ validator_username }}/.cargo/bin:\
+      /home/{{ validator_username }}/.local/share/solana/install/releases/{{ validator_source_version }}/bin"
+  when: >-
+    (validator_keypairs is not defined or validator_keypairs|length == 0) and
+    validator_generate_keypair
+
+- name: Ensure solana keys are present
+  ansible.builtin.copy:
+    content: "{{ item.key }}"
+    dest: "/home/{{ validator_username }}/{{ item.name }}.json"
+    owner: "{{ validator_username }}"
+    group: "{{ validator_username }}"
+    mode: "0600"
+  with_items: "{{ validator_keypairs }}"
+  when: validator_keypairs is defined
+
+- name: Set keypair to default
+  ansible.builtin.command: "solana config set --keypair {{ validator_public_key }}"
+  become: true
+  become_user: "{{ validator_username }}"
+  args:
+    chdir: "/home/{{ validator_username }}/"
+  changed_when: false
+  environment:
+    PATH: "/bin:/usr/bin:/usr/local/bin:\
+      /home/{{ validator_username }}/.cargo/bin:\
+      /home/{{ validator_username }}/.local/share/solana/install/releases/{{ validator_source_version }}/bin"
+
+- name: Check solana pubkey
+  ansible.builtin.command: "solana-keygen pubkey {{ validator_public_key }}"
+  register: res_pubkey
+  changed_when: false
+  become: true
+  become_user: "{{ validator_username }}"
+  environment:
+    PATH: "/bin:/usr/bin:/usr/local/bin:\
+      /home/{{ validator_username }}/.cargo/bin:\
+      /home/{{ validator_username }}/.local/share/solana/install/releases/{{ validator_source_version }}/bin"
+
+- name: Save public key hash
+  ansible.builtin.set_fact:
+    validator_public_key_hash: "{{ res_pubkey.stdout }}"

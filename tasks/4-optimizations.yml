@@ -1,0 +1,64 @@
+---
+# CPU governor settings, can be disabled with cpu_governor = bios
+- name: Disable ondemand governor (get performance governor)
+  block:
+    - name: Disable ondemand governor
+      become: true
+      ansible.builtin.systemd:
+        name: ondemand
+        enabled: false
+        state: stopped
+      when: validator_cpu_governor != "bios"
+  rescue:
+    - name: Service ondemand.service not found, skipping
+      ansible.builtin.debug:
+        msg: "ondemand.service isn’t installed, moving on"
+
+- name: Ensure cpu governor is set
+  become: true
+  ansible.builtin.copy:
+    content: 'GOVERNOR="{{ validator_cpu_governor }}"'
+    dest: /etc/default/cpufrequtils
+    owner: root
+    group: root
+    mode: "0644"
+  when: validator_cpu_governor != "bios"
+
+- name: Ensure CPU governor is set correctly
+  block:
+    - name: Check current CPU governor
+      become: true
+      ansible.builtin.command:
+        cmd: cpupower frequency-info -p
+      register: current_gov
+      changed_when: false
+
+    - name: Set CPU governor to {{ validator_cpu_governor }} # noqa: no-jinja-when
+      become: true
+      vars:
+        expected_policy: "current policy: {{ validator_cpu_governor }}"
+      ansible.builtin.command:
+        cmd: cpupower frequency-set -g {{ validator_cpu_governor }}
+      when:
+        - current_gov is defined
+        - validator_cpu_governor != "bios"
+        - expected_policy not in current_gov.stdout
+      register: set_gov
+      changed_when: expected_policy not in current_gov.stdout
+
+  rescue:
+    - name: Failed to determine CPU governor
+      ansible.builtin.debug:
+        msg: "Could not read current CPU governor, skipping configuration"
+
+# Sysctl settings
+- name: Ensure sysctl is set to sufficiently high value
+  become: true
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_set: true
+    state: present
+    reload: true
+    sysctl_file: "/etc/sysctl.d/99-solana-rpc.conf"
+  loop: "{{ validator_sysctl_optimisations | dict2items }}"

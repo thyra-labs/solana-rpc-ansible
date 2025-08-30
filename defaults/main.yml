@@ -1,0 +1,232 @@
+validator_username: validator
+validator_cpu_governor: performance
+
+validator_network: mainnet
+
+validator_root: /solana
+validator_ledger_location: /solana/ledger
+validator_accounts_location: /solana/accounts
+validator_snapshots_location: /solana/snapshots
+
+validator_environment:
+  - RUST_LOG=solana=info
+
+validator_install_rust: true
+validator_source_version: v2.3.6-jito
+validator_shredstream_version: master
+validator_yellowstone_version: v9.0.0+solana.2.3.6
+validator_peregrine_version: main
+
+validator_generate_keypair: true
+validator_public_key: "/home/{{ validator_username }}/identity.json"
+validator_keypairs: []
+
+validator_rpc_threads: 32
+validator_full_rpc_api: true
+validator_enable_geyser: false
+validator_x_token: ""
+validator_enable_shredstream: false
+validator_enable_peregrine: false
+validator_rpc_history: false
+
+validator_account_index:
+  - program-id
+  - spl-token-owner
+  - spl-token-mint
+validator_index_exclude_keys: []
+validator_index_include_keys: []
+
+validator_known_validators: []
+validator_authorized_voters: []
+
+validator_minimal_snapshot_download_speed: "200000000"
+validator_incremental_snapshot_interval_slots: "1000"
+validator_full_snapshot_interval_slots: "50000"
+validator_rpc_max_multiple_accounts: "5000"
+
+validator_gossip_port: "8001"
+validator_rpc_port: "8899"
+validator_rpc_bind_address: "0.0.0.0"
+validator_dynamic_port_range: "8000-10000"
+validator_wal_recovery_mode: skip_any_corrupted_record
+validator_limit_ledger_size: ""
+validator_accounts_db_cache_limit: 800000
+validator_accounts_index_memory_limit: 150000
+
+validator_bigtable_enabled: false
+validator_bigtable_upload_enabled: false
+
+validator_enabled_services:
+  - solana-rpc
+validator_disabled_services: []
+
+validator_sysctl_optimisations:
+  fs.nr_open: "1000000"
+  kernel.nmi_watchdog: "0"
+  kernel.pid_max: "65536"
+  net.ipv4.tcp_fastopen: "3"
+  net.core.rmem_max: "134217728"
+  net.core.rmem_default: "134217728"
+  net.core.wmem_max: "134217728"
+  net.core.wmem_default: "134217728"
+  vm.max_map_count: "1000000"
+
+# Repository URLs (override to use forks)
+jito_solana_repo_url: https://github.com/jito-foundation/jito-solana.git
+yellowstone_repo_url: https://github.com/rpcpool/yellowstone-grpc.git
+shredstream_repo_url: "https://github.com/jito-labs/shredstream-proxy.git"
+peregrine_repo_url: "https://github.com/arbx-so/peregrine.git"
+
+# Shredstream configuration
+validator_shredstream_block_engine_url: ""
+validator_shredstream_regions: "amsterdam,frankfurt"
+validator_shredstream_auth_keypair: ""
+# Optional base64-encoded keypair content; if set, it will be decoded
+validator_shredstream_auth_keypair_b64: ""
+# Optional base58-encoded 64-byte secret key; if set, it will be decoded to JSON array
+validator_shredstream_auth_keypair_b58: ""
+validator_shredstream_udp_port: "20000"
+
+# Optional firewall exposure toggles (closed by default)
+firewall_expose_rpc: false
+firewall_expose_yellowstone_grpc: false
+firewall_expose_yellowstone_prometheus: false
+firewall_expose_peregrine_api: false
+
+# Convenience ports for firewall rules
+yellowstone_grpc_port: "10000"
+yellowstone_prometheus_port: "8999"
+# -------------------------------------------------
+# Yellowstone configuration (yellowstone-grpc-geyser)
+# -------------------------------------------------
+# Library and logging
+yellowstone_libpath: "../target/release/libyellowstone_grpc_geyser.so"
+yellowstone_log_level: "info"
+
+# Tokio runtime
+yellowstone_tokio_worker_threads: 8
+yellowstone_tokio_affinity: "0-1,12-13"
+
+# gRPC server
+yellowstone_grpc_address: "0.0.0.0:10000"
+# TLS: set both paths to enable; otherwise renders null
+yellowstone_grpc_tls_cert_path: ""
+yellowstone_grpc_tls_key_path: ""
+yellowstone_grpc_compression_accept:
+  - gzip
+  - zstd
+yellowstone_grpc_compression_send:
+  - gzip
+  - zstd
+yellowstone_server_http2_adaptive_window: null
+yellowstone_server_http2_keepalive_interval: null
+yellowstone_server_http2_keepalive_timeout: null
+yellowstone_server_initial_connection_window_size: null
+yellowstone_server_initial_stream_window_size: null
+yellowstone_grpc_max_decoding_message_size: "4_194_304"
+yellowstone_grpc_snapshot_plugin_channel_capacity: null
+yellowstone_grpc_snapshot_client_channel_capacity: "50_000_000"
+yellowstone_grpc_channel_capacity: "100_000"
+yellowstone_grpc_unary_concurrency_limit: 100
+yellowstone_grpc_unary_disabled: false
+yellowstone_grpc_replay_stored_slots: 0
+
+# Filter limits and names
+yellowstone_grpc_filter_name_size_limit: 128
+yellowstone_grpc_filter_names_size_limit: 4096
+yellowstone_grpc_filter_names_cleanup_interval: "1s"
+# Set to an object matching the Yellowstone schema under `filters` to enforce limits, or keep {}
+# Example (YAML) — copied to JSON in the rendered config:
+# yellowstone_grpc_filters:
+#   accounts:
+#     max: 1
+#     any: false
+#     account_max: 10
+#     account_reject:
+#       - TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+#     owner_max: 10
+#     owner_reject:
+#       - 11111111111111111111111111111111
+#     data_slice_max: 2
+#   slots:
+#     max: 1
+#   transactions:
+#     max: 1
+#     any: false
+#     account_include_max: 10
+#     account_include_reject:
+#       - TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+#     account_exclude_max: 10
+#     account_required_max: 10
+#   transactions_status:
+#     max: 1
+#     any: false
+#     account_include_max: 10
+#     account_include_reject:
+#       - TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+#     account_exclude_max: 10
+#     account_required_max: 10
+#   blocks:
+#     max: 1
+#     account_include_max: 10
+#     account_include_any: false
+#     account_include_reject:
+#       - TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+#     include_transactions: true
+#     include_accounts: false
+#     include_entries: false
+#   blocks_meta:
+#     max: 1
+#   entries:
+#     max: 1
+yellowstone_grpc_filters: {}
+
+# Prometheus
+yellowstone_prometheus_address: "0.0.0.0:8999"
+
+# ---------------------------------
+# Peregrine configuration (gPA cache)
+# ---------------------------------
+# gRPC to Yellowstone
+peregrine_grpc_enabled: true
+peregrine_grpc_endpoint: "http://127.0.0.1:10000"
+peregrine_grpc_use_tls: false
+peregrine_grpc_connection_timeout: "10s"
+peregrine_grpc_request_timeout: "30s"
+peregrine_grpc_retry_attempts: 3
+peregrine_grpc_retry_delay: "1s"
+
+# RPC to validator
+peregrine_rpc_endpoint: "http://127.0.0.1:8899"
+peregrine_rpc_connection_timeout: "10s"
+peregrine_rpc_request_timeout: "10m"
+peregrine_rpc_max_connections: 100
+peregrine_rpc_max_idle_per_host: 10
+peregrine_rpc_keep_alive_timeout: "60s"
+
+# HTTP API
+peregrine_api_bind_address: "127.0.0.1"
+peregrine_api_port: 1945
+peregrine_api_max_connections: 128
+peregrine_api_request_timeout: "30s"
+
+# Performance tuning
+peregrine_perf_worker_threads: 16
+peregrine_perf_blocking_threads: 64
+peregrine_perf_buffer_size: 65536
+peregrine_perf_batch_size: 100
+peregrine_perf_enable_compression: true
+
+# Peregrine programs/filters (override to supply your own). If empty, a built-in
+# default list from the template is used.
+# Example (YAML) — copied to JSON in the rendered config:
+# peregrine_programs:
+#   - program_id: "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
+#     filters:
+#       - memcmp:
+#           offset: 0
+#           bytes: [6]
+#       - dynamic:
+#           offset: 400
+#           length: 32
+peregrine_programs: []
