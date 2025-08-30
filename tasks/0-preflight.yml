@@ -88,6 +88,14 @@
           - (not validator_enable_shredstream) or (((validator_shredstream_regions | default('')) | trim | length) > 0)
         fail_msg: "When validator_enable_shredstream is true, set non-empty validator_shredstream_regions."
 
+    - name: Assert shredstream UDP src bind port when enabled
+      ansible.builtin.assert:
+        that:
+          - (not validator_enable_shredstream) or (validator_shredstream_udp_port is match('^\d{1,5}$'))
+          - (not validator_enable_shredstream) or ((validator_shredstream_udp_port | int) >= 0)
+          - (not validator_enable_shredstream) or ((validator_shredstream_udp_port | int) <= 65535)
+        fail_msg: "validator_shredstream_udp_port must be an integer 0–65535 when shredstream is enabled (0 allows an ephemeral port)."
+
     - name: Assert TLS config completeness (Yellowstone)
       ansible.builtin.assert:
         that:
