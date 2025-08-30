@@ -138,6 +138,7 @@
         owner: "{{ validator_username }}"
         group: "{{ validator_username }}"
         mode: "0755"
+        force: true
 
 - name: Setup Yellowstone-gRPC
   when: validator_enable_geyser is defined and validator_enable_geyser
@@ -168,6 +169,7 @@
         owner: "{{ validator_username }}"
         group: "{{ validator_username }}"
         mode: "0644"
+        force: true
 
 - name: Setup Peregrine gPA Cache
   when: validator_enable_peregrine is defined and validator_enable_peregrine
@@ -199,3 +201,4 @@
         owner: "{{ validator_username }}"
         group: "{{ validator_username }}"
         mode: "0644"
+        force: true

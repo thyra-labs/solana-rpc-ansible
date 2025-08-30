@@ -36,6 +36,7 @@
       owner: root
       group: root
       mode: "0644"
+      force: true
   become: true
 
 - name: Install root limit override
@@ -45,6 +46,7 @@
       owner: root
       group: root
       mode: "0644"
+      force: true
   become: true
 
 - name: Install user override values
@@ -54,6 +56,7 @@
       owner: root
       group: root
       mode: "0644"
+      force: true
   become: true
 
 - name: Ensure systemd user dir is available
@@ -71,6 +74,7 @@
       owner: "{{ validator_username }}"
       group: "{{ validator_username }}"
       mode: "0755"
+      force: true
 
 - name: Copy rpc.env
   ansible.builtin.template:
@@ -79,6 +83,7 @@
       owner: "{{ validator_username }}"
       group: "{{ validator_username }}"
       mode: "0640"
+      force: true
 - name: Copy Bigtable credentials when enabled
   ansible.builtin.template:
       src: bigtable.json.j2
@@ -86,6 +91,7 @@
       owner: "{{ validator_username }}"
       group: "{{ validator_username }}"
       mode: "0600"
+      force: true
   when: validator_bigtable_enabled | bool
 
 - name: Install service units (enabled and disabled)
@@ -95,6 +101,7 @@
       owner: "{{ validator_username }}"
       group: "{{ validator_username }}"
       mode: "0644"
+      force: true
   with_items: "{{ (validator_enabled_services | default([])) + (validator_disabled_services | default([])) }}"
   loop_control:
       label: "{{ item }}"

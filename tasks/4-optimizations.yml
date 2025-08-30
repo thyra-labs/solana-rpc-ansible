@@ -22,6 +22,7 @@
     owner: root
     group: root
     mode: "0644"
+    force: true
   when: validator_cpu_governor != "bios"
 
 - name: Ensure CPU governor is set correctly
