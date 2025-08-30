@@ -34,6 +34,12 @@
           - validator_accounts_location is match('^/.+')
         fail_msg: "validator_root, ledger, and accounts must be absolute paths"
 
+    - name: Assert dynamic UDP port range format
+      ansible.builtin.assert:
+        that:
+          - validator_dynamic_port_range is match('^\\d{1,5}-\\d{1,5}$')
+        fail_msg: "validator_dynamic_port_range must be in the form start-end (e.g., 8000-10000)"
+
     - name: Assert repo URLs and component flags are consistent
       ansible.builtin.assert:
         that:
@@ -47,15 +53,57 @@
       ansible.builtin.assert:
         that:
           - (
-              (validator_block_engine_url | length == 0) and
-              (validator_relayer_url | length == 0) and
-              (validator_shred_receiver_address | length == 0)
+              ((validator_block_engine_url | default('')) | length == 0) and
+              ((validator_relayer_url | default('')) | length == 0) and
+              ((validator_shred_receiver_address | default('')) | length == 0)
             )
             or 
             (
-              (validator_block_engine_url | length > 0) and
-              (validator_relayer_url | length > 0) and
-              (validator_shred_receiver_address | length > 0)
+              ((validator_block_engine_url | default('')) | length > 0) and
+              ((validator_relayer_url | default('')) | length > 0) and
+              ((validator_shred_receiver_address | default('')) | length > 0)
             )
         fail_msg: "If using block engine integration, set all of validator_block_engine_url, validator_relayer_url, and validator_shred_receiver_address."
 
+    - name: Assert shredstream settings when enabled
+      ansible.builtin.assert:
+        that:
+          - (not validator_enable_shredstream) or ((validator_shredstream_block_engine_url | default('')) | length > 0)
+          - (not validator_enable_shredstream) or ( ((validator_shredstream_auth_keypair | default('')) | length > 0)
+                                                   or ((validator_shredstream_auth_keypair_b64 | default('')) | length > 0)
+                                                   or ((validator_shredstream_auth_keypair_b58 | default('')) | length > 0) )
+        fail_msg: "When validator_enable_shredstream is true, set validator_shredstream_block_engine_url and provide one of validator_shredstream_auth_keypair, validator_shredstream_auth_keypair_b64, or validator_shredstream_auth_keypair_b58."
+
+    - name: Assert TLS config completeness (Yellowstone)
+      ansible.builtin.assert:
+        that:
+          - (
+              ((yellowstone_grpc_tls_cert_path | default('')) | length == 0) and
+              ((yellowstone_grpc_tls_key_path | default('')) | length == 0)
+            )
+            or
+            (
+              ((yellowstone_grpc_tls_cert_path | default('')) | length > 0) and
+              ((yellowstone_grpc_tls_key_path | default('')) | length > 0)
+            )
+        fail_msg: "Set both yellowstone_grpc_tls_cert_path and yellowstone_grpc_tls_key_path, or leave both empty."
+
+    - name: Define allowed service units
+      ansible.builtin.set_fact:
+        _allowed_services: ["solana-rpc", "shredstream-proxy", "peregrine"]
+
+    - name: Compute invalid/overlap service entries
+      ansible.builtin.set_fact:
+        _invalid_enabled: "{{ (validator_enabled_services | default([])) | difference(_allowed_services) }}"
+        _invalid_disabled: "{{ (validator_disabled_services | default([])) | difference(_allowed_services) }}"
+        _overlap_services: "{{ (validator_enabled_services | default([])) | intersect(validator_disabled_services | default([])) }}"
+
+    - name: Assert service lists reference known units and do not overlap
+      ansible.builtin.assert:
+        that:
+          - (_invalid_enabled | length) == 0
+          - (_invalid_disabled | length) == 0
+          - (_overlap_services | length) == 0
+        fail_msg: >-
+          Invalid service configuration. Unknown enabled services: {{ _invalid_enabled }};
+          unknown disabled services: {{ _invalid_disabled }}; overlapping services: {{ _overlap_services }}.

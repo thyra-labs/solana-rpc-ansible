@@ -8,12 +8,14 @@
 - name: Ensure solana user can use lingering systemd
   ansible.builtin.command: loginctl enable-linger "{{ validator_username }}"
   changed_when: false
+  become: true
 
 - name: Ensure solana user is part of systemd-journal group
   ansible.builtin.user:
       name: "{{ validator_username }}"
       groups: systemd-journal
       append: true
+  become: true
 
 - name: Ensure solana directories exists
   ansible.builtin.file:
@@ -25,6 +27,7 @@
   with_items:
       - "/etc/systemd/system/user@.service.d/"
       - "/etc/systemd/user.conf.d/"
+  become: true
 
 - name: Install user service override
   ansible.builtin.template:
@@ -33,6 +36,7 @@
       owner: root
       group: root
       mode: "0644"
+  become: true
 
 - name: Install root limit override
   ansible.builtin.template:
@@ -41,6 +45,7 @@
       owner: root
       group: root
       mode: "0644"
+  become: true
 
 - name: Install user override values
   ansible.builtin.template:
@@ -49,6 +54,7 @@
       owner: root
       group: root
       mode: "0644"
+  become: true
 
 - name: Ensure systemd user dir is available
   ansible.builtin.file:
@@ -73,18 +79,23 @@
       owner: "{{ validator_username }}"
       group: "{{ validator_username }}"
       mode: "0640"
+- name: Copy Bigtable credentials when enabled
+  ansible.builtin.template:
+      src: bigtable.json
+      dest: "/home/{{ validator_username }}/bigtable.json"
+      owner: "{{ validator_username }}"
+      group: "{{ validator_username }}"
+      mode: "0600"
+  when: validator_bigtable_enabled | bool
 
-- name: Install service
+- name: Install service units (enabled and disabled)
   ansible.builtin.template:
       src: "{{ item }}.service"
       dest: "/home/{{ validator_username }}/.config/systemd/user/{{ item }}.service"
       owner: "{{ validator_username }}"
       group: "{{ validator_username }}"
       mode: "0644"
-  with_items:
-      - solana-rpc
-      - shredstream-proxy
-      - peregrine
+  with_items: "{{ (validator_enabled_services | default([])) + (validator_disabled_services | default([])) }}"
   loop_control:
       label: "{{ item }}"
 

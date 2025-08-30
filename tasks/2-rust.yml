@@ -19,18 +19,3 @@
 - name: Debug
   ansible.builtin.debug:
     var: install_output
-
-- name: Install rustfmt
-  ansible.builtin.command: rustup component add rustfmt
-  args:
-    chdir: "/home/{{ validator_username }}/"
-  environment:
-    PATH: "/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin"
-  become: true
-  become_user: "{{ validator_username }}"
-  register: rustup_output
-  changed_when: false
-
-- name: Debug
-  ansible.builtin.debug:
-    var: rustup_output

@@ -6,7 +6,7 @@ trap 'echo "Error on line $LINENO, exit code $?" >&2' ERR
 find "{{ validator_ledger_location }}" -name 'snapshot-*' -size 0 -print -exec rm {} \; || true
 
 # Build command + args
-BINARY="~/.local/share/solana/install/releases/{{ validator_source_version }}/bin/agave-validator"
+BINARY="/home/{{ validator_username }}/.local/share/solana/install/releases/{{ validator_source_version }}/bin/agave-validator"
 ARGS=()
 
 # Identity & networking
@@ -107,7 +107,9 @@ ARGS+=(--accounts-db-cache-limit-mb={{validator_accounts_db_cache_limit}})
 {% endif %}
 
 # Indexing & Bigtable
-ARGS+=(--account-index "{{ validator_account_index | join(' ') }}")
+{% for idx in validator_account_index %}
+ARGS+=(--account-index "{{ idx }}")
+{% endfor %}
 ARGS+=(--expected-genesis-hash "{{ validator_genesis_hash }}")
 {% if validator_rpc_threads is defined and validator_rpc_threads > 0 %}
 ARGS+=(--rpc-threads "{{ validator_rpc_threads }}")

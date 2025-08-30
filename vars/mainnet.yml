@@ -14,19 +14,6 @@ validator_known_validators:
   - DE1bawNcRJB9rVm3buyMVfr8mBEoyyu73NBovf2oXJsJ
   - CakcnaRDHka2gXyfbEd2d3xsvkJkqsLw2akB3zsN1D2S
 
-validator_index_include_keys:
-  - "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
-  - "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
-  - "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc"
-  - "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo"
-  - "Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB"
-  - "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG"
-  - "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"
-  - "SoLFiHG9TfgtdUXUjWAxi3LtvYuFyDLVhBWxdMZxyCe"
-  - "vrTGoBuy5rYSxAfV3jaRJWHH6nN9WK4NRExGxsk1bCJ"
-  - "HEAVENoP2qxoeuF8Dj2oT1GHEnu49U5mJYkdeC8BAX2o"
-  - "AddressLookupTab1e1111111111111111111111111"
-
 validator_block_engine_url: ""
 validator_relayer_url: ""
 validator_shred_receiver_address: ""

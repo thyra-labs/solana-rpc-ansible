@@ -9,8 +9,7 @@
   environment:
     PATH: "/bin:/usr/bin:/usr/local/bin:\
       /home/{{ validator_username }}/.cargo/bin:\
-      /home/{{ validator_username }}/.local/share/solana/install/releases/{{ validator_source_version }}/bin:\
-      /home/{{ validator_username }}/.local/share/solana/install/active_release/bin"
+      /home/{{ validator_username }}/.local/share/solana/install/releases/{{ validator_source_version }}/bin"
   when: >-
     (validator_keypairs is not defined or validator_keypairs|length == 0) and
     validator_generate_keypair
@@ -35,8 +34,7 @@
   environment:
     PATH: "/bin:/usr/bin:/usr/local/bin:\
       /home/{{ validator_username }}/.cargo/bin:\
-      /home/{{ validator_username }}/.local/share/solana/install/releases/{{ validator_source_version }}/bin:\
-      /home/{{ validator_username }}/.local/share/solana/install/active_release/bin"
+      /home/{{ validator_username }}/.local/share/solana/install/releases/{{ validator_source_version }}/bin"
 
 - name: Check solana pubkey
   ansible.builtin.command: "solana-keygen pubkey {{ validator_public_key }}"
@@ -47,9 +45,8 @@
   environment:
     PATH: "/bin:/usr/bin:/usr/local/bin:\
       /home/{{ validator_username }}/.cargo/bin:\
-      /home/{{ validator_username }}/.local/share/solana/install/releases/{{ validator_source_version }}/bin:\
-      /home/{{ validator_username }}/.local/share/solana/install/active_release/bin"
+      /home/{{ validator_username }}/.local/share/solana/install/releases/{{ validator_source_version }}/bin"
 
 - name: Save public key hash
   ansible.builtin.set_fact:
-    validator_public_key_hash: "{{ res_pubkey }}"
+    validator_public_key_hash: "{{ res_pubkey.stdout }}"
