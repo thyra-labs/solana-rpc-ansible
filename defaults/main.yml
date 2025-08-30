@@ -72,10 +72,10 @@ validator_sysctl_optimisations:
   vm.max_map_count: "1000000"
 
 # Repository URLs (override to use forks)
-jito_solana_repo_url: https://github.com/jito-foundation/jito-solana.git
-yellowstone_repo_url: https://github.com/rpcpool/yellowstone-grpc.git
-shredstream_repo_url: "https://github.com/jito-labs/shredstream-proxy.git"
-peregrine_repo_url: "https://github.com/arbx-so/peregrine.git"
+validator_jito_solana_repo_url: "https://github.com/jito-foundation/jito-solana.git"
+validator_yellowstone_repo_url: "https://github.com/rpcpool/yellowstone-grpc.git"
+validator_shredstream_repo_url: "https://github.com/jito-labs/shredstream-proxy.git"
+validator_peregrine_repo_url: "https://github.com/arbx-so/peregrine.git"
 
 # Shredstream configuration
 validator_shredstream_block_engine_url: ""
@@ -89,139 +89,96 @@ validator_shredstream_udp_port: "20000"
 validator_shredstream_grpc_service_port: "9682"
 
 # Optional firewall exposure toggles (closed by default)
-firewall_expose_rpc: false
-firewall_expose_yellowstone_grpc: false
-firewall_expose_yellowstone_prometheus: false
-firewall_expose_peregrine_api: false
+validator_firewall_expose_rpc: false
+validator_firewall_expose_yellowstone_grpc: false
+validator_firewall_expose_yellowstone_prometheus: false
+validator_firewall_expose_peregrine_api: false
 
 # Convenience ports for firewall rules
-yellowstone_grpc_port: "10000"
-yellowstone_prometheus_port: "8999"
+validator_yellowstone_grpc_port: "10000"
+validator_yellowstone_prometheus_port: "8999"
 # -------------------------------------------------
 # Yellowstone configuration (yellowstone-grpc-geyser)
 # -------------------------------------------------
 # Library and logging
-yellowstone_libpath: "../target/release/libyellowstone_grpc_geyser.so"
-yellowstone_log_level: "info"
+validator_yellowstone_libpath: "../target/release/libyellowstone_grpc_geyser.so"
+validator_yellowstone_log_level: "info"
 
 # Tokio runtime
-yellowstone_tokio_worker_threads: 8
-yellowstone_tokio_affinity: "0-1,12-13"
+validator_yellowstone_tokio_worker_threads: 8
+validator_yellowstone_tokio_affinity: "0-1,12-13"
 
 # gRPC server
-yellowstone_grpc_address: "0.0.0.0:10000"
+validator_yellowstone_grpc_address: "0.0.0.0:10000"
 # TLS: set both paths to enable; otherwise renders null
-yellowstone_grpc_tls_cert_path: ""
-yellowstone_grpc_tls_key_path: ""
-yellowstone_grpc_compression_accept:
+validator_yellowstone_grpc_tls_cert_path: ""
+validator_yellowstone_grpc_tls_key_path: ""
+validator_yellowstone_grpc_compression_accept:
   - gzip
   - zstd
-yellowstone_grpc_compression_send:
+validator_yellowstone_grpc_compression_send:
   - gzip
   - zstd
-yellowstone_server_http2_adaptive_window: null
-yellowstone_server_http2_keepalive_interval: null
-yellowstone_server_http2_keepalive_timeout: null
-yellowstone_server_initial_connection_window_size: null
-yellowstone_server_initial_stream_window_size: null
-yellowstone_grpc_max_decoding_message_size: "4_194_304"
-yellowstone_grpc_snapshot_plugin_channel_capacity: null
-yellowstone_grpc_snapshot_client_channel_capacity: "50_000_000"
-yellowstone_grpc_channel_capacity: "100_000"
-yellowstone_grpc_unary_concurrency_limit: 100
-yellowstone_grpc_unary_disabled: false
-yellowstone_grpc_replay_stored_slots: 0
+validator_yellowstone_server_http2_adaptive_window: null
+validator_yellowstone_server_http2_keepalive_interval: null
+validator_yellowstone_server_http2_keepalive_timeout: null
+validator_yellowstone_server_initial_connection_window_size: null
+validator_yellowstone_server_initial_stream_window_size: null
+validator_yellowstone_grpc_max_decoding_message_size: "4_194_304"
+validator_yellowstone_grpc_snapshot_plugin_channel_capacity: null
+validator_yellowstone_grpc_snapshot_client_channel_capacity: "50_000_000"
+validator_yellowstone_grpc_channel_capacity: "100_000"
+validator_yellowstone_grpc_unary_concurrency_limit: 100
+validator_yellowstone_grpc_unary_disabled: false
+validator_yellowstone_grpc_replay_stored_slots: 0
 
 # Filter limits and names
-yellowstone_grpc_filter_name_size_limit: 128
-yellowstone_grpc_filter_names_size_limit: 4096
-yellowstone_grpc_filter_names_cleanup_interval: "1s"
+validator_yellowstone_grpc_filter_name_size_limit: 128
+validator_yellowstone_grpc_filter_names_size_limit: 4096
+validator_yellowstone_grpc_filter_names_cleanup_interval: "1s"
 # Set to an object matching the Yellowstone schema under `filters` to enforce limits, or keep {}
-# Example (YAML) — copied to JSON in the rendered config:
-# yellowstone_grpc_filters:
-#   accounts:
-#     max: 1
-#     any: false
-#     account_max: 10
-#     account_reject:
-#       - TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
-#     owner_max: 10
-#     owner_reject:
-#       - 11111111111111111111111111111111
-#     data_slice_max: 2
-#   slots:
-#     max: 1
-#   transactions:
-#     max: 1
-#     any: false
-#     account_include_max: 10
-#     account_include_reject:
-#       - TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
-#     account_exclude_max: 10
-#     account_required_max: 10
-#   transactions_status:
-#     max: 1
-#     any: false
-#     account_include_max: 10
-#     account_include_reject:
-#       - TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
-#     account_exclude_max: 10
-#     account_required_max: 10
-#   blocks:
-#     max: 1
-#     account_include_max: 10
-#     account_include_any: false
-#     account_include_reject:
-#       - TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
-#     include_transactions: true
-#     include_accounts: false
-#     include_entries: false
-#   blocks_meta:
-#     max: 1
-#   entries:
-#     max: 1
-yellowstone_grpc_filters: {}
+validator_yellowstone_grpc_filters: {}
 
 # Prometheus
-yellowstone_prometheus_address: "0.0.0.0:8999"
+validator_yellowstone_prometheus_address: "0.0.0.0:8999"
 
 # ---------------------------------
 # Peregrine configuration (gPA cache)
 # ---------------------------------
 # gRPC to Yellowstone
-peregrine_grpc_enabled: true
-peregrine_grpc_endpoint: "http://127.0.0.1:10000"
-peregrine_grpc_use_tls: false
-peregrine_grpc_connection_timeout: "10s"
-peregrine_grpc_request_timeout: "30s"
-peregrine_grpc_retry_attempts: 3
-peregrine_grpc_retry_delay: "1s"
+validator_peregrine_grpc_enabled: true
+validator_peregrine_grpc_endpoint: "http://127.0.0.1:10000"
+validator_peregrine_grpc_use_tls: false
+validator_peregrine_grpc_connection_timeout: "10s"
+validator_peregrine_grpc_request_timeout: "30s"
+validator_peregrine_grpc_retry_attempts: 3
+validator_peregrine_grpc_retry_delay: "1s"
 
 # RPC to validator
-peregrine_rpc_endpoint: "http://127.0.0.1:8899"
-peregrine_rpc_connection_timeout: "10s"
-peregrine_rpc_request_timeout: "10m"
-peregrine_rpc_max_connections: 100
-peregrine_rpc_max_idle_per_host: 10
-peregrine_rpc_keep_alive_timeout: "60s"
+validator_peregrine_rpc_endpoint: "http://127.0.0.1:8899"
+validator_peregrine_rpc_connection_timeout: "10s"
+validator_peregrine_rpc_request_timeout: "10m"
+validator_peregrine_rpc_max_connections: 100
+validator_peregrine_rpc_max_idle_per_host: 10
+validator_peregrine_rpc_keep_alive_timeout: "60s"
 
 # HTTP API
-peregrine_api_bind_address: "127.0.0.1"
-peregrine_api_port: 1945
-peregrine_api_max_connections: 128
-peregrine_api_request_timeout: "30s"
+validator_peregrine_api_bind_address: "127.0.0.1"
+validator_peregrine_api_port: 1945
+validator_peregrine_api_max_connections: 128
+validator_peregrine_api_request_timeout: "30s"
 
 # Performance tuning
-peregrine_perf_worker_threads: 16
-peregrine_perf_blocking_threads: 64
-peregrine_perf_buffer_size: 65536
-peregrine_perf_batch_size: 100
-peregrine_perf_enable_compression: true
+validator_peregrine_perf_worker_threads: 16
+validator_peregrine_perf_blocking_threads: 64
+validator_peregrine_perf_buffer_size: 65536
+validator_peregrine_perf_batch_size: 100
+validator_peregrine_perf_enable_compression: true
 
 # Peregrine programs/filters (override to supply your own). If empty, a built-in
 # default list from the template is used.
 # Example (YAML) — copied to JSON in the rendered config:
-# peregrine_programs:
+# validator_peregrine_programs:
 #   - program_id: "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
 #     filters:
 #       - memcmp:
@@ -230,4 +187,4 @@ peregrine_perf_enable_compression: true
 #       - dynamic:
 #           offset: 400
 #           length: 32
-peregrine_programs: []
+validator_peregrine_programs: []

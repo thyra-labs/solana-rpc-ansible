@@ -1,34 +1,34 @@
 {
     "grpc": {
-        "enabled": {{ peregrine_grpc_enabled | lower }},
-        "endpoint": "{{ peregrine_grpc_endpoint }}",
+        "enabled": {{ validator_peregrine_grpc_enabled | lower }},
+        "endpoint": "{{ validator_peregrine_grpc_endpoint }}",
         "api_token": {% if (validator_x_token | default('')) | length > 0 %}"{{ validator_x_token }}"{% else %}null{% endif %},
-        "use_tls": {{ peregrine_grpc_use_tls | lower }},
-        "connection_timeout": "{{ peregrine_grpc_connection_timeout }}",
-        "request_timeout": "{{ peregrine_grpc_request_timeout }}",
-        "retry_attempts": {{ peregrine_grpc_retry_attempts }},
-        "retry_delay": "{{ peregrine_grpc_retry_delay }}"
+        "use_tls": {{ validator_peregrine_grpc_use_tls | lower }},
+        "connection_timeout": "{{ validator_peregrine_grpc_connection_timeout }}",
+        "request_timeout": "{{ validator_peregrine_grpc_request_timeout }}",
+        "retry_attempts": {{ validator_peregrine_grpc_retry_attempts }},
+        "retry_delay": "{{ validator_peregrine_grpc_retry_delay }}"
     },
     "rpc": {
-        "endpoint": "{{ peregrine_rpc_endpoint }}",
-        "connection_timeout": "{{ peregrine_rpc_connection_timeout }}",
-        "request_timeout": "{{ peregrine_rpc_request_timeout }}",
-        "max_connections": {{ peregrine_rpc_max_connections }},
-        "max_idle_per_host": {{ peregrine_rpc_max_idle_per_host }},
-        "keep_alive_timeout": "{{ peregrine_rpc_keep_alive_timeout }}"
+        "endpoint": "{{ validator_peregrine_rpc_endpoint }}",
+        "connection_timeout": "{{ validator_peregrine_rpc_connection_timeout }}",
+        "request_timeout": "{{ validator_peregrine_rpc_request_timeout }}",
+        "max_connections": {{ validator_peregrine_rpc_max_connections }},
+        "max_idle_per_host": {{ validator_peregrine_rpc_max_idle_per_host }},
+        "keep_alive_timeout": "{{ validator_peregrine_rpc_keep_alive_timeout }}"
     },
     "api": {
-        "bind_address": "{{ peregrine_api_bind_address }}",
-        "port": {{ peregrine_api_port }},
-        "max_connections": {{ peregrine_api_max_connections }},
-        "request_timeout": "{{ peregrine_api_request_timeout }}"
+        "bind_address": "{{ validator_peregrine_api_bind_address }}",
+        "port": {{ validator_peregrine_api_port }},
+        "max_connections": {{ validator_peregrine_api_max_connections }},
+        "request_timeout": "{{ validator_peregrine_api_request_timeout }}"
     },
     "performance": {
-        "worker_threads": {{ peregrine_perf_worker_threads }},
-        "blocking_threads": {{ peregrine_perf_blocking_threads }},
-        "buffer_size": {{ peregrine_perf_buffer_size }},
-        "batch_size": {{ peregrine_perf_batch_size }},
-        "enable_compression": {{ peregrine_perf_enable_compression | lower }}
+        "worker_threads": {{ validator_peregrine_perf_worker_threads }},
+        "blocking_threads": {{ validator_peregrine_perf_blocking_threads }},
+        "buffer_size": {{ validator_peregrine_perf_buffer_size }},
+        "batch_size": {{ validator_peregrine_perf_batch_size }},
+        "enable_compression": {{ validator_peregrine_perf_enable_compression | lower }}
     },
-    "programs": {% if peregrine_programs is defined and (peregrine_programs | length) > 0 %}{{ peregrine_programs | tojson }}{% else %}[]{% endif %}
+    "programs": {% if validator_peregrine_programs is defined and (validator_peregrine_programs | length) > 0 %}{{ validator_peregrine_programs | tojson }}{% else %}[]{% endif %}
 }

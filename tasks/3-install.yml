@@ -17,7 +17,7 @@
   block:
     - name: Clone the jito-solana repository
       ansible.builtin.git:
-        repo: "{{ jito_solana_repo_url }}"
+        repo: "{{ validator_jito_solana_repo_url }}"
         dest: "/home/{{ validator_username }}/jito-solana"
         clone: true
         version: "{{ validator_source_version }}"
@@ -46,9 +46,9 @@
   when: validator_enable_shredstream is defined and validator_enable_shredstream
   block:
     - name: Clone Jito Shredstream repository
-      when: shredstream_repo_url is defined and shredstream_repo_url | length > 0
+      when: validator_shredstream_repo_url is defined and validator_shredstream_repo_url | length > 0
       ansible.builtin.git:
-        repo: "{{ shredstream_repo_url }}"
+        repo: "{{ validator_shredstream_repo_url }}"
         dest: "/home/{{ validator_username }}/shredstream-proxy"
         clone: true
         version: "{{ validator_shredstream_version }}"
@@ -144,7 +144,7 @@
   block:
     - name: Clone the Yellowstone gRPC repository
       ansible.builtin.git:
-        repo: "{{ yellowstone_repo_url }}"
+        repo: "{{ validator_yellowstone_repo_url }}"
         dest: "/home/{{ validator_username }}/yellowstone-grpc"
         clone: true
         version: "{{ validator_yellowstone_version }}"
@@ -173,9 +173,9 @@
   when: validator_enable_peregrine is defined and validator_enable_peregrine
   block:
     - name: Clone the Peregrine repository
-      when: peregrine_repo_url is defined and peregrine_repo_url | length > 0
+      when: validator_peregrine_repo_url is defined and validator_peregrine_repo_url | length > 0
       ansible.builtin.git:
-        repo: "{{ peregrine_repo_url }}"
+        repo: "{{ validator_peregrine_repo_url }}"
         dest: "/home/{{ validator_username }}/peregrine"
         clone: true
         force: true

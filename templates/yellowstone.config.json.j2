@@ -1,41 +1,41 @@
 {
-    "libpath": "{{ yellowstone_libpath }}",
+    "libpath": "{{ validator_yellowstone_libpath }}",
     "log": {
-        "level": "{{ yellowstone_log_level }}"
+        "level": "{{ validator_yellowstone_log_level }}"
     },
     "tokio": {
-        "worker_threads": {{ yellowstone_tokio_worker_threads }},
-        "affinity": "{{ yellowstone_tokio_affinity }}"
+        "worker_threads": {{ validator_yellowstone_tokio_worker_threads }},
+        "affinity": "{{ validator_yellowstone_tokio_affinity }}"
     },
     "grpc": {
-        "address": "{{ yellowstone_grpc_address }}",
-        "tls_config": {% if (yellowstone_grpc_tls_cert_path | default('')) | length > 0 and (yellowstone_grpc_tls_key_path | default('')) | length > 0 %}{
-            "cert_path": "{{ yellowstone_grpc_tls_cert_path }}",
-            "key_path": "{{ yellowstone_grpc_tls_key_path }}"
+        "address": "{{ validator_yellowstone_grpc_address }}",
+        "tls_config": {% if (validator_yellowstone_grpc_tls_cert_path | default('')) | length > 0 and (validator_yellowstone_grpc_tls_key_path | default('')) | length > 0 %}{
+            "cert_path": "{{ validator_yellowstone_grpc_tls_cert_path }}",
+            "key_path": "{{ validator_yellowstone_grpc_tls_key_path }}"
         }{% else %}null{% endif %},
         "compression": {
-            "accept": {{ yellowstone_grpc_compression_accept | tojson }},
-            "send": {{ yellowstone_grpc_compression_send | tojson }}
+            "accept": {{ validator_yellowstone_grpc_compression_accept | tojson }},
+            "send": {{ validator_yellowstone_grpc_compression_send | tojson }}
         },
-        "server_http2_adaptive_window": {{ yellowstone_server_http2_adaptive_window | tojson }},
-        "server_http2_keepalive_interval": {{ yellowstone_server_http2_keepalive_interval | tojson }},
-        "server_http2_keepalive_timeout": {{ yellowstone_server_http2_keepalive_timeout | tojson }},
-        "server_initial_connection_window_size": {{ yellowstone_server_initial_connection_window_size | tojson }},
-        "server_initial_stream_window_size": {{ yellowstone_server_initial_stream_window_size | tojson }},
-        "max_decoding_message_size": "{{ yellowstone_grpc_max_decoding_message_size }}",
-        "snapshot_plugin_channel_capacity": {{ yellowstone_grpc_snapshot_plugin_channel_capacity | tojson }},
-        "snapshot_client_channel_capacity": "{{ yellowstone_grpc_snapshot_client_channel_capacity }}",
-        "channel_capacity": "{{ yellowstone_grpc_channel_capacity }}",
-        "unary_concurrency_limit": {{ yellowstone_grpc_unary_concurrency_limit }},
-        "unary_disabled": {{ yellowstone_grpc_unary_disabled | lower }},
+        "server_http2_adaptive_window": {{ validator_yellowstone_server_http2_adaptive_window | tojson }},
+        "server_http2_keepalive_interval": {{ validator_yellowstone_server_http2_keepalive_interval | tojson }},
+        "server_http2_keepalive_timeout": {{ validator_yellowstone_server_http2_keepalive_timeout | tojson }},
+        "server_initial_connection_window_size": {{ validator_yellowstone_server_initial_connection_window_size | tojson }},
+        "server_initial_stream_window_size": {{ validator_yellowstone_server_initial_stream_window_size | tojson }},
+        "max_decoding_message_size": "{{ validator_yellowstone_grpc_max_decoding_message_size }}",
+        "snapshot_plugin_channel_capacity": {{ validator_yellowstone_grpc_snapshot_plugin_channel_capacity | tojson }},
+        "snapshot_client_channel_capacity": "{{ validator_yellowstone_grpc_snapshot_client_channel_capacity }}",
+        "channel_capacity": "{{ validator_yellowstone_grpc_channel_capacity }}",
+        "unary_concurrency_limit": {{ validator_yellowstone_grpc_unary_concurrency_limit }},
+        "unary_disabled": {{ validator_yellowstone_grpc_unary_disabled | lower }},
         "x_token": {% if (validator_x_token | default('')) | length > 0 %}"{{ validator_x_token }}"{% else %}null{% endif %},
-        "replay_stored_slots": {{ yellowstone_grpc_replay_stored_slots }},
-        "filter_name_size_limit": {{ yellowstone_grpc_filter_name_size_limit }},
-        "filter_names_size_limit": {{ yellowstone_grpc_filter_names_size_limit }},
-        "filter_names_cleanup_interval": "{{ yellowstone_grpc_filter_names_cleanup_interval }}",
-        "filters": {{ yellowstone_grpc_filters | tojson }}
+        "replay_stored_slots": {{ validator_yellowstone_grpc_replay_stored_slots }},
+        "filter_name_size_limit": {{ validator_yellowstone_grpc_filter_name_size_limit }},
+        "filter_names_size_limit": {{ validator_yellowstone_grpc_filter_names_size_limit }},
+        "filter_names_cleanup_interval": "{{ validator_yellowstone_grpc_filter_names_cleanup_interval }}",
+        "filters": {{ validator_yellowstone_grpc_filters | tojson }}
     },
     "prometheus": {
-        "address": "{{ yellowstone_prometheus_address }}"
+        "address": "{{ validator_yellowstone_prometheus_address }}"
     }
 }

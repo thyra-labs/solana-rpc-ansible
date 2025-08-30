@@ -51,10 +51,10 @@
     - name: Assert repo URLs and component flags are consistent
       ansible.builtin.assert:
         that:
-          - (not validator_enable_shredstream) or (shredstream_repo_url | length > 0)
-          - (not validator_enable_peregrine) or (peregrine_repo_url | length > 0)
-          - jito_solana_repo_url | length > 0
-          - yellowstone_repo_url | length > 0
+          - (not validator_enable_shredstream) or (validator_shredstream_repo_url | length > 0)
+          - (not validator_enable_peregrine) or (validator_peregrine_repo_url | length > 0)
+          - validator_jito_solana_repo_url | length > 0
+          - validator_yellowstone_repo_url | length > 0
         fail_msg: "Enable flags require corresponding repo URLs to be set."
 
     - name: Assert block engine/relayer/shred receiver are set together when any is set
@@ -104,15 +104,15 @@
       ansible.builtin.assert:
         that:
           - (
-              ((yellowstone_grpc_tls_cert_path | default('')) | length == 0) and
-              ((yellowstone_grpc_tls_key_path | default('')) | length == 0)
+              ((validator_yellowstone_grpc_tls_cert_path | default('')) | length == 0) and
+              ((validator_yellowstone_grpc_tls_key_path | default('')) | length == 0)
             )
             or
             (
-              ((yellowstone_grpc_tls_cert_path | default('')) | length > 0) and
-              ((yellowstone_grpc_tls_key_path | default('')) | length > 0)
+              ((validator_yellowstone_grpc_tls_cert_path | default('')) | length > 0) and
+              ((validator_yellowstone_grpc_tls_key_path | default('')) | length > 0)
             )
-        fail_msg: "Set both yellowstone_grpc_tls_cert_path and yellowstone_grpc_tls_key_path, or leave both empty."
+        fail_msg: "Set both validator_yellowstone_grpc_tls_cert_path and validator_yellowstone_grpc_tls_key_path, or leave both empty."
 
     - name: Define allowed service units
       ansible.builtin.set_fact:

@@ -45,10 +45,10 @@ Firewall
 - UFW enabled only if inactive.
 
 Optional exposures (closed by default)
-- `firewall_expose_rpc`: when true, allows `{{ validator_rpc_port }}`/tcp from anywhere.
-- `firewall_expose_yellowstone_grpc`: when true and geyser enabled, allows the port parsed from `yellowstone_grpc_address` (default `10000`)/tcp.
-- `firewall_expose_yellowstone_prometheus`: when true and geyser enabled, allows the port parsed from `yellowstone_prometheus_address` (default `8999`)/tcp.
-- `firewall_expose_peregrine_api`: when true and peregrine enabled, allows `{{ peregrine_api_port }}`/tcp.
+- `validator_firewall_expose_rpc`: when true, allows `{{ validator_rpc_port }}`/tcp from anywhere.
+- `validator_firewall_expose_yellowstone_grpc`: when true and geyser enabled, allows the port parsed from `validator_yellowstone_grpc_address` (default `10000`)/tcp.
+- `validator_firewall_expose_yellowstone_prometheus`: when true and geyser enabled, allows the port parsed from `validator_yellowstone_prometheus_address` (default `8999`)/tcp.
+- `validator_firewall_expose_peregrine_api`: when true and peregrine enabled, allows `{{ validator_peregrine_api_port }}`/tcp.
 
 Keys and identity
 - Auto‑generate identity when `validator_generate_keypair: true`.
@@ -69,8 +69,8 @@ Yellowstone gRPC
 - Enable: `validator_enable_geyser: true`.
 - Config path: `/home/{{ validator_username }}/yellowstone-grpc/yellowstone-grpc-geyser/config.json`.
 - Token: `validator_x_token` is optional (renders `null` when empty).
-- TLS: set both `yellowstone_grpc_tls_cert_path` and `yellowstone_grpc_tls_key_path`; otherwise `tls_config` is `null`.
-- Filters: set `yellowstone_grpc_filters` to enforce limits; leave `{}` for no limits. Matches Yellowstone's `filters` schema.
+- TLS: set both `validator_yellowstone_grpc_tls_cert_path` and `validator_yellowstone_grpc_tls_key_path`; otherwise `tls_config` is `null`.
+- Filters: set `validator_yellowstone_grpc_filters` to enforce limits; leave `{}` for no limits. Matches Yellowstone's `filters` schema.
 
 Service management
 - The role installs unit files and enables services you list in:
@@ -86,9 +86,9 @@ Peregrine gPA Cache
 - Enable: `validator_enable_peregrine: true`.
 - Runs binary: `/home/{{ validator_username }}/peregrine/target/release/peregrine run`.
 - Token: uses `validator_x_token` (renders `null` when empty).
-- Filters/programs: override in YAML via `peregrine_programs`. If empty, built‑in defaults are used.
+- Filters/programs: override in YAML via `validator_peregrine_programs`. If empty, built‑in defaults are used.
 ```yaml
-peregrine_programs:
+validator_peregrine_programs:
   - program_id: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
     filters:
       - memcmp: { offset: 0, bytes: [1] }
@@ -97,7 +97,7 @@ peregrine_programs:
 Shredstream proxy
 - Enable: `validator_enable_shredstream: true` and set:
 ```yaml
-shredstream_repo_url: https://github.com/yourorg/shredstream-proxy.git
+validator_shredstream_repo_url: https://github.com/yourorg/shredstream-proxy.git
 validator_shredstream_block_engine_url: https://frankfurt.mainnet.block-engine.jito.wtf
 validator_shredstream_regions: "amsterdam,frankfurt"
 # Provide one (priority b58 > b64 > JSON array):
@@ -111,7 +111,7 @@ validator_shredstream_auth_keypair: |
 - The role writes `jito-blockengine-keypair.json` and installs `run.sh` accordingly.
 
 CPU affinity (Yellowstone)
-- Match `yellowstone_tokio_worker_threads` to the number of CPUs in `yellowstone_tokio_affinity`.
+- Match `validator_yellowstone_tokio_worker_threads` to the number of CPUs in `validator_yellowstone_tokio_affinity`.
 - Prefer CPUs from the same NUMA node; avoid CPU0/IRQ hotspots when possible.
 
 Notes

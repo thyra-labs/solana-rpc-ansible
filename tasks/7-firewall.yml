@@ -36,31 +36,31 @@
   ansible.builtin.command: ufw allow {{ validator_rpc_port }}/tcp
   register: ufw_allow_rpc_tcp
   changed_when: "'Skipping adding existing rule' not in ufw_allow_rpc_tcp.stdout"
-  when: firewall_expose_rpc | bool
+  when: validator_firewall_expose_rpc | bool
 
 - name: Derive Yellowstone gRPC/Prometheus ports
   ansible.builtin.set_fact:
-    _ys_grpc_port: "{{ (yellowstone_grpc_address.split(':') | last) | trim }}"
-    _ys_prom_port: "{{ (yellowstone_prometheus_address.split(':') | last) | trim }}"
+    _ys_grpc_port: "{{ (validator_yellowstone_grpc_address.split(':') | last) | trim }}"
+    _ys_prom_port: "{{ (validator_yellowstone_prometheus_address.split(':') | last) | trim }}"
   when: validator_enable_geyser | bool
 
-- name: "Allow Yellowstone gRPC port: {{ _ys_grpc_port | default(yellowstone_grpc_port) }}"
-  ansible.builtin.command: ufw allow {{ (_ys_grpc_port | default(yellowstone_grpc_port)) }}/tcp
+- name: "Allow Yellowstone gRPC port: {{ _ys_grpc_port | default(validator_yellowstone_grpc_port) }}"
+  ansible.builtin.command: ufw allow {{ (_ys_grpc_port | default(validator_yellowstone_grpc_port)) }}/tcp
   register: ufw_allow_ys_grpc
   changed_when: "'Skipping adding existing rule' not in ufw_allow_ys_grpc.stdout"
-  when: firewall_expose_yellowstone_grpc | bool and validator_enable_geyser | bool
+  when: validator_firewall_expose_yellowstone_grpc | bool and validator_enable_geyser | bool
 
-- name: "Allow Yellowstone Prometheus port: {{ _ys_prom_port | default(yellowstone_prometheus_port) }}"
-  ansible.builtin.command: ufw allow {{ (_ys_prom_port | default(yellowstone_prometheus_port)) }}/tcp
+- name: "Allow Yellowstone Prometheus port: {{ _ys_prom_port | default(validator_yellowstone_prometheus_port) }}"
+  ansible.builtin.command: ufw allow {{ (_ys_prom_port | default(validator_yellowstone_prometheus_port)) }}/tcp
   register: ufw_allow_ys_prom
   changed_when: "'Skipping adding existing rule' not in ufw_allow_ys_prom.stdout"
-  when: firewall_expose_yellowstone_prometheus | bool and validator_enable_geyser | bool
+  when: validator_firewall_expose_yellowstone_prometheus | bool and validator_enable_geyser | bool
 
-- name: "Allow Peregrine API port: {{ peregrine_api_port }}"
-  ansible.builtin.command: ufw allow {{ peregrine_api_port }}/tcp
+- name: "Allow Peregrine API port: {{ validator_peregrine_api_port }}"
+  ansible.builtin.command: ufw allow {{ validator_peregrine_api_port }}/tcp
   register: ufw_allow_peregrine_api
   changed_when: "'Skipping adding existing rule' not in ufw_allow_peregrine_api.stdout"
-  when: firewall_expose_peregrine_api | bool and validator_enable_peregrine | bool
+  when: validator_firewall_expose_peregrine_api | bool and validator_enable_peregrine | bool
 
 - name: Check UFW status
   ansible.builtin.command: ufw status
