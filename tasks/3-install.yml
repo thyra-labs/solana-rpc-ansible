@@ -1,5 +1,4 @@
 ---
-
 - name: Ensure validator's storage directories are available
   ansible.builtin.file:
     path: "{{ item }}"
@@ -66,7 +65,7 @@
         PATH: "/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin"
       become: true
       become_user: "{{ validator_username }}"
-    - name: Write shredstream auth keypair from base58
+    - name: Write ShredStream auth keypair from base58
       ansible.builtin.shell: |
         set -euo pipefail
         python3 - << 'PY'
@@ -135,7 +134,6 @@
         owner: "{{ validator_username }}"
         group: "{{ validator_username }}"
         mode: "0755"
-
 
 - name: Setup Yellowstone-gRPC
   when: validator_enable_geyser is defined and validator_enable_geyser

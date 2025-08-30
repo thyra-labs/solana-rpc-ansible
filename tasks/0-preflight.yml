@@ -40,6 +40,14 @@
           - validator_dynamic_port_range is match('^\\d{1,5}-\\d{1,5}$')
         fail_msg: "validator_dynamic_port_range must be in the form start-end (e.g., 8000-10000)"
 
+    - name: Assert gossip port is numeric and within range
+      ansible.builtin.assert:
+        that:
+          - validator_gossip_port is match('^\\d{1,5}$')
+          - (validator_gossip_port | int) >= 1
+          - (validator_gossip_port | int) <= 65534
+        fail_msg: "validator_gossip_port must be an integer between 1 and 65534"
+
     - name: Assert repo URLs and component flags are consistent
       ansible.builtin.assert:
         that:
@@ -73,6 +81,12 @@
                                                    or ((validator_shredstream_auth_keypair_b64 | default('')) | length > 0)
                                                    or ((validator_shredstream_auth_keypair_b58 | default('')) | length > 0) )
         fail_msg: "When validator_enable_shredstream is true, set validator_shredstream_block_engine_url and provide one of validator_shredstream_auth_keypair, validator_shredstream_auth_keypair_b64, or validator_shredstream_auth_keypair_b58."
+
+    - name: Assert shredstream regions when enabled
+      ansible.builtin.assert:
+        that:
+          - (not validator_enable_shredstream) or (((validator_shredstream_regions | default('')) | trim | length) > 0)
+        fail_msg: "When validator_enable_shredstream is true, set non-empty validator_shredstream_regions."
 
     - name: Assert TLS config completeness (Yellowstone)
       ansible.builtin.assert:

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+trap 'echo "Error on line $LINENO, exit code $?" >&2' ERR
+
+# Run the built Shredstream proxy with configured settings
+RUST_LOG=info \
+./target/release/jito-shredstream-proxy shredstream \
+  --block-engine-url "{{ validator_shredstream_block_engine_url }}" \
+  --auth-keypair "/home/{{ validator_username }}/shredstream-proxy/jito-blockengine-keypair.json" \
+  --desired-regions "{{ validator_shredstream_regions }}" \
+  --dest-ip-ports "127.0.0.1:{{ (validator_gossip_port | int) + 1 }}"{{ (((validator_shredstream_grpc_service_port | default('') | string) | length) > 0) | ternary(' \\', '') }}
+{% if (validator_shredstream_grpc_service_port | default('') | string) | length > 0 %}
+  --grpc-service-port "{{ validator_shredstream_grpc_service_port }}" \
+  --num-threads 1
+{% endif %}

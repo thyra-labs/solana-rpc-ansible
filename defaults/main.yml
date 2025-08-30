@@ -86,6 +86,7 @@ validator_shredstream_auth_keypair_b64: ""
 # Optional base58-encoded 64-byte secret key; if set, it will be decoded to JSON array
 validator_shredstream_auth_keypair_b58: ""
 validator_shredstream_udp_port: "20000"
+validator_shredstream_grpc_service_port: "9682"
 
 # Optional firewall exposure toggles (closed by default)
 firewall_expose_rpc: false
