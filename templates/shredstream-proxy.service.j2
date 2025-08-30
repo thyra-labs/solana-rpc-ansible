@@ -1,0 +1,23 @@
+[Unit]
+Description=Shredstream Proxy Service
+After=solana-rpc.service
+PartOf=solana-rpc.service
+Requires=solana-rpc.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/{{ validator_username }}/shredstream-proxy
+ExecStart=/home/{{ validator_username }}/shredstream-proxy/run.sh
+Restart=on-failure
+RestartSec=5s
+
+SupplementaryGroups=
+PrivateUsers=no
+NoNewPrivileges=no
+
+Environment="HOME=/home/{{ validator_username }}"
+Environment="USER={{ validator_username }}"
+Environment="PATH=/home/{{ validator_username }}/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+[Install]
+WantedBy=default.target

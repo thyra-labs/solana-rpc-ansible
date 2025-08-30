@@ -130,7 +130,7 @@
         - (validator_shredstream_auth_keypair | default('')) | length > 0 or (validator_shredstream_auth_keypair_b64 | default('')) | length > 0
     - name: Install shredstream run.sh
       ansible.builtin.template:
-        src: shredstream-run.sh
+        src: shredstream-run.sh.j2
         dest: "/home/{{ validator_username }}/shredstream-proxy/run.sh"
         owner: "{{ validator_username }}"
         group: "{{ validator_username }}"
@@ -160,7 +160,7 @@
       become_user: "{{ validator_username }}"
     - name: Copy the Yellowstone config
       ansible.builtin.template:
-        src: yellowstone.config.json
+        src: yellowstone.config.json.j2
         dest: "/home/{{ validator_username }}/yellowstone-grpc/yellowstone-grpc-geyser/config.json"
         owner: "{{ validator_username }}"
         group: "{{ validator_username }}"
@@ -191,7 +191,7 @@
       become_user: "{{ validator_username }}"
     - name: Copy the Peregrine config
       ansible.builtin.template:
-        src: peregrine.config.json
+        src: peregrine.config.json.j2
         dest: "/home/{{ validator_username }}/peregrine/config.json"
         owner: "{{ validator_username }}"
         group: "{{ validator_username }}"
