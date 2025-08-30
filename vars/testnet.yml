@@ -14,9 +14,6 @@ validator_known_validators:
 
 validator_enable_shredstream: false
 
-validator_block_engine_url: ""
-validator_relayer_url: ""
-validator_shred_receiver_address: ""
 validator_tip_payment_program_pubkey: GJHtFqM9agxPmkeKjHny6qiRKrXZALvvFGiKf11QE7hy
 validator_tip_distribution_program_pubkey: F2Zu7QZiTYUhPd7u9ukRVwxh7B71oA3NMJcHuCHc29P2
 validator_merkle_root_upload_authority: GZctHpWXmsZC1YHACTGGcHhYxjdRqQvTpYkb9LMvxDib

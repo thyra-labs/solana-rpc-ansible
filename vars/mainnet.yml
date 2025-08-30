@@ -14,9 +14,6 @@ validator_known_validators:
   - DE1bawNcRJB9rVm3buyMVfr8mBEoyyu73NBovf2oXJsJ
   - CakcnaRDHka2gXyfbEd2d3xsvkJkqsLw2akB3zsN1D2S
 
-validator_block_engine_url: ""
-validator_relayer_url: ""
-validator_shred_receiver_address: ""
 validator_tip_payment_program_pubkey: T1pyyaTNZsKv2WcRAB8oVnk93mLJw2XzjtVYqCsaHqt
 validator_tip_distribution_program_pubkey: 4R3gSG8BpU4t19KYj8CfnbtRpnT8gtk4dvTHxVRwc2r7
 validator_merkle_root_upload_authority: GZctHpWXmsZC1YHACTGGcHhYxjdRqQvTpYkb9LMvxDib
