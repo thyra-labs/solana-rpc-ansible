@@ -1,0 +1,36 @@
+name: Lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enforce Jinja template naming
+        run: |
+          set -euo pipefail
+          # Fail if any non-.j2 templates exist
+          if find templates -type f \( ! -name '*.j2' \) -print | grep .; then
+            echo "Found non-.j2 files in templates/. Please rename to *.j2" >&2
+            exit 1
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install linters
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible ansible-lint yamllint
+
+      - name: Run ansible-lint
+        run: ansible-lint -v || ansible-lint -v
+
+      - name: Run yamllint
+        run: yamllint -c .yamllint.yml .
