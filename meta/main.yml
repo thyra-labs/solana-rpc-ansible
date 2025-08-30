@@ -2,6 +2,7 @@
 galaxy_info:
   author: Petro S. <contact@arbx.so>
   role_name: validator
+  namespace: arbx
   description: Ansible role for deploying Solana RPC nodes
   company: Arbx on Solana
   license: MIT

@@ -28,11 +28,11 @@
       ansible.builtin.command:
         cmd: "./scripts/cargo-install-all.sh --validator-only ~/.local/share/solana/install/releases/{{ validator_source_version }}"
         chdir: "/home/{{ validator_username }}/jito-solana"
-        creates: "/home/{{ validator_username }}/.local/share/solana/install/releases/{{ validator_source_version }}/bin/agave-validator"
       environment:
         PATH: "/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin"
       become: true
       become_user: "{{ validator_username }}"
+      changed_when: true
     - name: Point active_release to current build
       ansible.builtin.file:
         src: "/home/{{ validator_username }}/.local/share/solana/install/releases/{{ validator_source_version }}"
@@ -58,13 +58,13 @@
     - name: Build the Shredstream entrypoint
       ansible.builtin.command:
         cmd: cargo build --release --bin jito-shredstream-proxy
-        creates: "/home/{{ validator_username }}/shredstream-proxy/target/release/jito-shredstream-proxy"
       args:
         chdir: "/home/{{ validator_username }}/shredstream-proxy"
       environment:
         PATH: "/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin"
       become: true
       become_user: "{{ validator_username }}"
+      changed_when: true
     - name: Write ShredStream auth keypair from base58
       ansible.builtin.shell: |
         set -euo pipefail
@@ -112,6 +112,7 @@
         chmod 0600 "/home/{{ validator_username }}/shredstream-proxy/jito-blockengine-keypair.json"
       args:
         executable: /bin/bash
+        creates: "/home/{{ validator_username }}/shredstream-proxy/jito-blockengine-keypair.json"
       when:
         - validator_enable_shredstream | bool
         - (validator_shredstream_auth_keypair_b58 | default('')) | length > 0
@@ -119,7 +120,10 @@
     - name: Write shredstream auth keypair from b64/plain json
       ansible.builtin.copy:
         dest: "/home/{{ validator_username }}/shredstream-proxy/jito-blockengine-keypair.json"
-        content: "{{ (validator_shredstream_auth_keypair_b64 | default('')) | length > 0 | ternary(validator_shredstream_auth_keypair_b64 | b64decode, validator_shredstream_auth_keypair) }}"
+        content: >-
+          {{ (validator_shredstream_auth_keypair_b64 | default('')) | length > 0
+             | ternary(validator_shredstream_auth_keypair_b64 | b64decode,
+                       validator_shredstream_auth_keypair) }}
         owner: "{{ validator_username }}"
         group: "{{ validator_username }}"
         mode: "0600"
@@ -147,7 +151,7 @@
         force: true
       become: true
       become_user: "{{ validator_username }}"
-    - name: Build the gRPC .so binary (always)
+    - name: Build the gRPC .so binary
       ansible.builtin.command:
         cmd: cargo build --release
       args:
@@ -156,6 +160,7 @@
         PATH: "/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin"
       become: true
       become_user: "{{ validator_username }}"
+      changed_when: true
     - name: Copy the Yellowstone config
       ansible.builtin.template:
         src: yellowstone.config.json.j2
@@ -180,13 +185,13 @@
     - name: Build the Peregrine binary
       ansible.builtin.command:
         cmd: cargo build --release
-        creates: "/home/{{ validator_username }}/peregrine/target/release/peregrine"
       args:
         chdir: "/home/{{ validator_username }}/peregrine"
       environment:
         PATH: "/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin"
       become: true
       become_user: "{{ validator_username }}"
+      changed_when: true
     - name: Copy the Peregrine config
       ansible.builtin.template:
         src: peregrine.config.json.j2

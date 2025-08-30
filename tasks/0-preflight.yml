@@ -65,7 +65,7 @@
               ((validator_relayer_url | default('')) | length == 0) and
               ((validator_shred_receiver_address | default('')) | length == 0)
             )
-            or 
+            or
             (
               ((validator_block_engine_url | default('')) | length > 0) and
               ((validator_relayer_url | default('')) | length > 0) and
@@ -80,7 +80,11 @@
           - (not validator_enable_shredstream) or ( ((validator_shredstream_auth_keypair | default('')) | length > 0)
                                                    or ((validator_shredstream_auth_keypair_b64 | default('')) | length > 0)
                                                    or ((validator_shredstream_auth_keypair_b58 | default('')) | length > 0) )
-        fail_msg: "When validator_enable_shredstream is true, set validator_shredstream_block_engine_url and provide one of validator_shredstream_auth_keypair, validator_shredstream_auth_keypair_b64, or validator_shredstream_auth_keypair_b58."
+        fail_msg: >-
+          When validator_enable_shredstream is true, set
+          validator_shredstream_block_engine_url and provide one of
+          validator_shredstream_auth_keypair, validator_shredstream_auth_keypair_b64,
+          or validator_shredstream_auth_keypair_b58.
 
     - name: Assert shredstream regions when enabled
       ansible.builtin.assert:

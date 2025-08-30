@@ -33,7 +33,7 @@
       register: current_gov
       changed_when: false
 
-    - name: Set CPU governor to {{ validator_cpu_governor }} # noqa: no-jinja-when
+    - name: Set CPU governor to {{ validator_cpu_governor }}  # noqa: no-jinja-when
       become: true
       vars:
         expected_policy: "current policy: {{ validator_cpu_governor }}"
