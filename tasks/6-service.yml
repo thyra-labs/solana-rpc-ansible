@@ -31,7 +31,7 @@
 
 - name: Install user service override
   ansible.builtin.template:
-      src: user-override.conf
+      src: user-override.conf.j2
       dest: /etc/systemd/system/user@.service.d/override.conf
       owner: root
       group: root
@@ -40,7 +40,7 @@
 
 - name: Install root limit override
   ansible.builtin.template:
-      src: limits.conf
+      src: limits.conf.j2
       dest: /etc/security/limits.d/90-solana-nofiles.conf
       owner: root
       group: root
@@ -49,7 +49,7 @@
 
 - name: Install user override values
   ansible.builtin.template:
-      src: user-conf-d-override.conf
+      src: user-conf-d-override.conf.j2
       dest: /etc/systemd/user.conf.d/override.conf
       owner: root
       group: root
@@ -66,7 +66,7 @@
 
 - name: Copy rpc.sh
   ansible.builtin.template:
-      src: solana-rpc.sh
+      src: solana-rpc.sh.j2
       dest: "/home/{{ validator_username }}/bin/solana-rpc.sh"
       owner: "{{ validator_username }}"
       group: "{{ validator_username }}"
@@ -74,14 +74,14 @@
 
 - name: Copy rpc.env
   ansible.builtin.template:
-      src: solana-rpc.env
+      src: solana-rpc.env.j2
       dest: "/home/{{ validator_username }}/solana-rpc.env"
       owner: "{{ validator_username }}"
       group: "{{ validator_username }}"
       mode: "0640"
 - name: Copy Bigtable credentials when enabled
   ansible.builtin.template:
-      src: bigtable.json
+      src: bigtable.json.j2
       dest: "/home/{{ validator_username }}/bigtable.json"
       owner: "{{ validator_username }}"
       group: "{{ validator_username }}"
@@ -90,7 +90,7 @@
 
 - name: Install service units (enabled and disabled)
   ansible.builtin.template:
-      src: "{{ item }}.service"
+      src: "{{ item }}.service.j2"
       dest: "/home/{{ validator_username }}/.config/systemd/user/{{ item }}.service"
       owner: "{{ validator_username }}"
       group: "{{ validator_username }}"
