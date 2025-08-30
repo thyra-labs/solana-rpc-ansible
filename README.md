@@ -1,12 +1,13 @@
-# Jito Solana Validator (Ansible Role)
+# Jito Solana RPC Server (Ansible Role)
 
-Production‑ready role to deploy a Jito‑enhanced Solana RPC validator with optional Yellowstone gRPC, Jito Shredstream, and Peregrine gPA cache. Safe defaults, clear variables, and systemd user services.
+Production‑ready role to deploy a Jito‑enhanced Solana RPC server (non‑voting, RPC‑focused) with optional Yellowstone gRPC, Jito Shredstream, and Peregrine gPA cache. Safe defaults, clear variables, and systemd user services. This is not a “staking/consensus” validator setup; it is an RPC server for serving queries and subscriptions.
 
-What this role does
+What this role does (RPC‑focused)
 - Builds and installs `jito-solana` at a pinned tag.
 - Optionally builds/configures Yellowstone gRPC, Shredstream proxy, and Peregrine.
 - Installs user services; enables only what you list in `validator_enabled_services`.
 - Configures UFW: preserves existing allows, denies other incoming, opens only required ports.
+ - Runs the node in non‑voting mode with RPC‑first tuning (not intended for staking/consensus duties).
 
 Requirements
 - Ubuntu/Debian with systemd
@@ -112,6 +113,9 @@ validator_shredstream_auth_keypair: |
 CPU affinity (Yellowstone)
 - Match `yellowstone_tokio_worker_threads` to the number of CPUs in `yellowstone_tokio_affinity`.
 - Prefer CPUs from the same NUMA node; avoid CPU0/IRQ hotspots when possible.
+
+Notes
+- This role configures a Solana RPC server (non‑voting). It is not a guide for running a consensus/validator node for staking. If you need a full validator, you will need voting keys, authorized voters, ledger snapshot bootstrapping for voting, and additional network hardening not covered here.
 
 Tips and troubleshooting
 - Bigtable: when `validator_bigtable_enabled: true`, credentials are templated to `/home/{{ validator_username }}/bigtable.json` and referenced by `GOOGLE_APPLICATION_CREDENTIALS`.
