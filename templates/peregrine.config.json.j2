@@ -18,8 +18,8 @@
         "keep_alive_timeout": "{{ validator_peregrine_rpc_keep_alive_timeout }}"
     },
     "api": {
-        "bind_address": "{{ validator_peregrine_api_bind_address }}",
-        "port": {{ validator_peregrine_api_port }},
+        "bind_address": "{{ (validator_peregrine_api_address.split(':')[:-1] | join(':')) | trim }}",
+        "port": {{ (validator_peregrine_api_address.split(':') | last | int) }},
         "max_connections": {{ validator_peregrine_api_max_connections }},
         "request_timeout": "{{ validator_peregrine_api_request_timeout }}"
     },

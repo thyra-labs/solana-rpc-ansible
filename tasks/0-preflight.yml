@@ -48,6 +48,14 @@
           - (validator_gossip_port | int) <= 65534
         fail_msg: "validator_gossip_port must be an integer between 1 and 65534"
 
+    - name: Assert RPC address contains a valid port
+      ansible.builtin.assert:
+        that:
+          - validator_rpc_address is match('^.+:\\d{1,5}$')
+          - ((validator_rpc_address.split(':') | last | int) >= 1)
+          - ((validator_rpc_address.split(':') | last | int) <= 65535)
+        fail_msg: "validator_rpc_address must include a port (e.g., 0.0.0.0:8899)."
+
     - name: Assert repo URLs and component flags are consistent
       ansible.builtin.assert:
         that:
@@ -113,6 +121,30 @@
               ((validator_yellowstone_grpc_tls_key_path | default('')) | length > 0)
             )
         fail_msg: "Set both validator_yellowstone_grpc_tls_cert_path and validator_yellowstone_grpc_tls_key_path, or leave both empty."
+
+    - name: Assert Yellowstone gRPC address contains a valid port when geyser enabled
+      ansible.builtin.assert:
+        that:
+          - (not validator_enable_geyser) or (validator_yellowstone_grpc_address is match('^.+:\\d{1,5}$'))
+          - (not validator_enable_geyser) or ((validator_yellowstone_grpc_address.split(':') | last | int) >= 1)
+          - (not validator_enable_geyser) or ((validator_yellowstone_grpc_address.split(':') | last | int) <= 65535)
+        fail_msg: "validator_yellowstone_grpc_address must include a port (e.g., 0.0.0.0:10000) when geyser is enabled."
+
+    - name: Assert Yellowstone Prometheus address contains a valid port when geyser enabled
+      ansible.builtin.assert:
+        that:
+          - (not validator_enable_geyser) or (validator_yellowstone_prometheus_address is match('^.+:\\d{1,5}$'))
+          - (not validator_enable_geyser) or ((validator_yellowstone_prometheus_address.split(':') | last | int) >= 1)
+          - (not validator_enable_geyser) or ((validator_yellowstone_prometheus_address.split(':') | last | int) <= 65535)
+        fail_msg: "validator_yellowstone_prometheus_address must include a port (e.g., 0.0.0.0:8999) when geyser is enabled."
+
+    - name: Assert Peregrine API address contains a valid port when peregrine enabled
+      ansible.builtin.assert:
+        that:
+          - (not validator_enable_peregrine) or (validator_peregrine_api_address is match('^.+:\\d{1,5}$'))
+          - (not validator_enable_peregrine) or ((validator_peregrine_api_address.split(':') | last | int) >= 1)
+          - (not validator_enable_peregrine) or ((validator_peregrine_api_address.split(':') | last | int) <= 65535)
+        fail_msg: "validator_peregrine_api_address must include a port (e.g., 127.0.0.1:1945) when peregrine is enabled."
 
     - name: Define allowed service units
       ansible.builtin.set_fact:

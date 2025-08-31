@@ -45,8 +45,7 @@ validator_full_snapshot_interval_slots: "50000"
 validator_rpc_max_multiple_accounts: "5000"
 
 validator_gossip_port: "8001"
-validator_rpc_port: "8899"
-validator_rpc_bind_address: "0.0.0.0"
+validator_rpc_address: "0.0.0.0:8899"
 validator_dynamic_port_range: "8000-10000"
 validator_wal_recovery_mode: skip_any_corrupted_record
 validator_limit_ledger_size: ""
@@ -80,13 +79,13 @@ validator_peregrine_repo_url: "https://github.com/arbx-so/peregrine.git"
 # Shredstream configuration
 validator_shredstream_block_engine_url: ""
 validator_shredstream_regions: "amsterdam,frankfurt"
+validator_shredstream_udp_port: "20000"
+validator_shredstream_grpc_service_port: ""
 validator_shredstream_auth_keypair: ""
 # Optional base64-encoded keypair content; if set, it will be decoded
 validator_shredstream_auth_keypair_b64: ""
 # Optional base58-encoded 64-byte secret key; if set, it will be decoded to JSON array
 validator_shredstream_auth_keypair_b58: ""
-validator_shredstream_udp_port: "20000"
-validator_shredstream_grpc_service_port: "9682"
 
 # Optional firewall exposure toggles (closed by default)
 validator_firewall_expose_rpc: false
@@ -94,9 +93,6 @@ validator_firewall_expose_yellowstone_grpc: false
 validator_firewall_expose_yellowstone_prometheus: false
 validator_firewall_expose_peregrine_api: false
 
-# Convenience ports for firewall rules
-validator_yellowstone_grpc_port: "10000"
-validator_yellowstone_prometheus_port: "8999"
 # -------------------------------------------------
 # Yellowstone configuration (yellowstone-grpc-geyser)
 # -------------------------------------------------
@@ -139,7 +135,7 @@ validator_yellowstone_grpc_filter_names_cleanup_interval: "1s"
 # Set to an object matching the Yellowstone schema under `filters` to enforce limits, or keep {}
 validator_yellowstone_grpc_filters: {}
 
-# Prometheus
+# Yellowstone Prometheus
 validator_yellowstone_prometheus_address: "0.0.0.0:8999"
 
 # ---------------------------------
@@ -163,8 +159,7 @@ validator_peregrine_rpc_max_idle_per_host: 10
 validator_peregrine_rpc_keep_alive_timeout: "60s"
 
 # HTTP API
-validator_peregrine_api_bind_address: "127.0.0.1"
-validator_peregrine_api_port: 1945
+validator_peregrine_api_address: "0.0.0.0:1945"
 validator_peregrine_api_max_connections: 128
 validator_peregrine_api_request_timeout: "30s"
 

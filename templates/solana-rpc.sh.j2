@@ -37,8 +37,8 @@ ARGS+=(--snapshot-archive-format "{{ validator_snapshot_compression }}")
 # Core flags
 ARGS+=(
   --log -
-  --rpc-port "{{ validator_rpc_port }}"
-  --rpc-bind-address "{{ validator_rpc_bind_address }}"
+  --rpc-port "{{ (validator_rpc_address.split(':') | last) | trim }}"
+  --rpc-bind-address "{{ (validator_rpc_address.split(':')[:-1] | join(':')) | trim }}"
   --dynamic-port-range "{{ validator_dynamic_port_range }}"
   --wal-recovery-mode "{{ validator_wal_recovery_mode }}"
 {% if validator_limit_ledger_size is defined and (validator_limit_ledger_size|string)|length > 0 %}
