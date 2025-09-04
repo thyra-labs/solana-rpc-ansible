@@ -2,13 +2,44 @@
 set -euo pipefail
 trap 'echo "Error on line $LINENO, exit code $?" >&2' ERR
 
+# Detect TVU port dynamically from validator contact-info
+LEDGER_DIR='{{ validator_ledger_location }}'
+# Ensure common install paths are available
+export PATH="/bin:/usr/bin:/usr/local/bin:/home/{{ validator_username }}/.cargo/bin:/home/{{ validator_username }}/.local/share/solana/install/active_release/bin:${PATH:-}"
+
+TVU_PORT=""
+if command -v solana >/dev/null 2>&1; then
+  ver=$(solana --version 2>/dev/null || true)
+  bin=""
+  case "$ver" in
+    "solana-cli 2."*) bin="agave-validator" ;;
+    "solana-cli 1."*) bin="solana-validator" ;;
+  esac
+  if [[ -z "$bin" ]]; then
+    if command -v agave-validator >/dev/null 2>&1; then bin=agave-validator; fi
+    if [[ -z "$bin" ]] && command -v solana-validator >/dev/null 2>&1; then bin=solana-validator; fi
+  fi
+  if [[ -n "$bin" ]]; then
+    if TVU_PORT=$("$bin" --ledger "$LEDGER_DIR" contact-info | awk -F'[: ]+' '/TVU:/ {print $NF; found=1} END{exit found?0:1}'); then
+      : # TVU_PORT detected
+    else
+      TVU_PORT=""
+    fi
+  fi
+fi
+
+if [[ -z "${TVU_PORT}" ]]; then
+  echo "Validator is not available at the moment" >&2
+  exit 1
+fi
+
 # Run the built Shredstream proxy with configured settings
 RUST_LOG=info \
 ./target/release/jito-shredstream-proxy shredstream \
   --block-engine-url "{{ validator_shredstream_block_engine_url }}" \
   --auth-keypair "/home/{{ validator_username }}/shredstream-proxy/jito-blockengine-keypair.json" \
   --desired-regions "{{ validator_shredstream_regions }}" \
-  --dest-ip-ports "127.0.0.1:{{ _tvu_port }}" \
+  --dest-ip-ports "127.0.0.1:${TVU_PORT}" \
   --src-bind-port "{{ validator_shredstream_udp_port }}"{{ (((validator_shredstream_grpc_service_port | default('') | string) | length) > 0) | ternary(' \\', '') }}
 {% if (validator_shredstream_grpc_service_port | default('') | string) | length > 0 %}
   --grpc-service-port "{{ validator_shredstream_grpc_service_port }}" \
