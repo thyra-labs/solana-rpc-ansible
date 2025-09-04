@@ -1,10 +1,10 @@
 ---
 galaxy_info:
-  author: Petro S. <contact@arbx.so>
+  author: Petro S. <petro.saputskyi@proton.me>
   role_name: validator
-  namespace: arbx
+  namespace: thyra-labs
   description: Ansible role for deploying Solana RPC nodes
-  company: Arbx on Solana
+  company: Thyra Labs
   license: MIT
   min_ansible_version: "2.18"
 

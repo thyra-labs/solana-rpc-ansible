@@ -74,7 +74,7 @@ validator_sysctl_optimisations:
 validator_jito_solana_repo_url: "https://github.com/jito-foundation/jito-solana.git"
 validator_yellowstone_repo_url: "https://github.com/rpcpool/yellowstone-grpc.git"
 validator_shredstream_repo_url: "https://github.com/jito-labs/shredstream-proxy.git"
-validator_peregrine_repo_url: "https://github.com/arbx-so/peregrine.git"
+validator_peregrine_repo_url: "https://github.com/thyra-labs/peregrine.git"
 
 # Shredstream configuration
 validator_shredstream_block_engine_url: ""
