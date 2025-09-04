@@ -7,7 +7,7 @@
     mode: "0755"
     state: directory
   with_items:
-    - "/home/{{ validator_username }}/bin"
+    - "/home/{{ validator_username }}/rpc-entrypoint"
     - "{{ validator_root }}"
     - "{{ validator_ledger_location }}"
     - "{{ validator_ledger_location }}/rocksdb"
