@@ -1,18 +1,38 @@
 ---
+- name: Enable Ubuntu universe repository
+  ansible.builtin.apt_repository:
+    repo: "deb http://archive.ubuntu.com/ubuntu {{ ansible_distribution_release }} universe"
+    state: present
+
+- name: Enable Ubuntu universe updates repository
+  ansible.builtin.apt_repository:
+    repo: "deb http://archive.ubuntu.com/ubuntu {{ ansible_distribution_release }}-updates universe"
+    state: present
+
 - name: Install build and system dependencies
   ansible.builtin.apt:
+    update_cache: true
     pkg:
-      - libssl-dev
-      - libudev-dev
-      - pkg-config
-      - zlib1g-dev
-      - llvm
-      - clang
-      - make
+      - build-essential
       - git
       - acl
+      - pkg-config
+      - cmake
       - protobuf-compiler
+      - libprotobuf-dev
+      - libssl-dev
+      - libudev-dev
+      - zlib1g-dev
+      - clang
+      - llvm-18-dev
+      - libclang-18-dev
     state: present
+
+- name: Ensure LIBCLANG_PATH for builds
+  ansible.builtin.copy:
+    dest: /etc/profile.d/libclang.sh
+    mode: '0755'
+    content: export LIBCLANG_PATH=/usr/lib/llvm-18/lib
 
 - name: Install kernel tools (Ubuntu)
   ansible.builtin.apt:

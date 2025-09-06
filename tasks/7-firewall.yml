@@ -15,6 +15,12 @@
       register: ufw_allow
       changed_when: "'Default outgoing policy changed' in ufw_allow.stdout"
 
+- name: "Allow SSH service (OpenSSH)"
+  ansible.builtin.command: ufw allow OpenSSH
+  register: ufw_allow_ssh
+  changed_when: "'Skipping adding existing rule' not in ufw_allow_ssh.stdout"
+  when: validator_firewall_allow_ssh | bool
+
 - name: "Allow Solana gossip port: {{ validator_gossip_port }}"
   ansible.builtin.command: ufw allow {{ validator_gossip_port }}/tcp
   register: ufw_allow_gossip_tcp

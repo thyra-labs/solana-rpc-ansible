@@ -61,7 +61,7 @@ Common Recipes
 
 Networking & Ports
 - Defaults: deny incoming, allow outgoing. UFW enabled only if inactive; existing allows preserved.
-- Always allowed: OpenSSH, `validator_gossip_port` (tcp), `validator_dynamic_port_range` (udp).
+- Always allowed (configurable): OpenSSH (when `validator_firewall_allow_ssh: true`), `validator_gossip_port` (tcp), `validator_dynamic_port_range` (udp).
 - Optional openings (off by default): RPC, Yellowstone gRPC/Prometheus, Peregrine API — opened from their `..._address` values when the corresponding `validator_firewall_expose_*` flag is true.
 
 Migration Notes (address‑only)
@@ -205,6 +205,7 @@ Firewall Exposure Toggles
 
 | Variable                                           | Default | Description                                                                              |
 | -------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------- |
+| `validator_firewall_allow_ssh`                     | `true`  | Allow SSH via `ufw allow OpenSSH`.                                                       |
 | `validator_firewall_expose_rpc`                    | `false` | Allow port parsed from `validator_rpc_address`.                                          |
 | `validator_firewall_expose_yellowstone_grpc`       | `false` | Allow port parsed from `validator_yellowstone_grpc_address` (when geyser enabled).       |
 | `validator_firewall_expose_yellowstone_prometheus` | `false` | Allow port parsed from `validator_yellowstone_prometheus_address` (when geyser enabled). |

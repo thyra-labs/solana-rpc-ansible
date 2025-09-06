@@ -3,6 +3,8 @@ validator_cpu_governor: performance
 
 validator_network: mainnet
 
+validator_firewall_allow_ssh: true
+
 validator_root: /solana
 validator_ledger_location: /solana/ledger
 validator_accounts_location: /solana/accounts
