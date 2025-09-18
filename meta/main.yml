@@ -2,9 +2,9 @@
 galaxy_info:
   author: Petro S. <petro.saputskyi@proton.me>
   role_name: validator
-  namespace: thyra-labs
+  namespace: northgroup-so
   description: Ansible role for deploying Solana RPC nodes
-  company: Thyra Labs
+  company: NorthGroup
   license: MIT
   min_ansible_version: "2.18"
 

@@ -187,7 +187,7 @@ Repository URLs
 | `validator_jito_solana_repo_url` | `https://github.com/jito-foundation/jito-solana.git` | Agave/Jito source.  |
 | `validator_yellowstone_repo_url` | `https://github.com/rpcpool/yellowstone-grpc.git`    | Yellowstone source. |
 | `validator_shredstream_repo_url` | `https://github.com/jito-labs/shredstream-proxy.git` | Shredstream source. |
-| `validator_peregrine_repo_url`   | `https://github.com/thyra-labs/peregrine.git`        | Peregrine source.   |
+| `validator_peregrine_repo_url`   | `https://github.com/northgroup-so/peregrine.git`     | Peregrine source.   |
 
 Shredstream
 
